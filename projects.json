@@ -1,0 +1,65 @@
+[
+  {
+    "id": "bose-headphones-01",
+    "title": "BOSE Premium Headphones",
+    "category": "craft",
+    "badge": "Hardware Drop",
+    "description": "High-fidelity studio headphones tuned for precision audio monitoring and long editing sessions.",
+    "fullDescription": "Experience uncompromised acoustic clarity with engineered drivers, active noise isolation, and memory foam ear cushions built for all-day development sessions.",
+    "price": "₹3,499",
+    "priceNumeric": 3499,
+    "gumroadUrl": "https://gamerindian68.gumroad.com/l/imsenr?wanted=true",
+    "image": "Assets/BOSE HEADPHONES.jpg",
+    "gallery": [
+      "Assets/BOSE HEADPHONES.jpg",
+      "Assets/BOSE HEADPHONES 2.jpg",
+      "Assets/BOSE HEADPHONES 3.jpg",
+      "Assets/BOSE HEADPHONES 4.jpg"
+    ]
+  },
+  {
+    "id": "portronics-toad-one",
+    "title": "Portronics Toad One Mouse",
+    "category": "craft",
+    "badge": "Hardware Drop",
+    "description": "Ultra-lightweight high-DPI optical sensor mouse designed for maximum speed and tactile grip.",
+    "fullDescription": "Featuring a multi-device 2.4GHz wireless connection, silent tactile switches, and an ergonomic palm rest suited for intense coding and gaming.",
+    "price": "₹1,899",
+    "priceNumeric": 1899,
+    "gumroadUrl": "https://gumroad.com",
+    "image": "Assets/PORTRONICS TOAD ONE.jpg",
+    "gallery": [
+      "Assets/PORTRONICS TOAD ONE.jpg"
+    ]
+  },
+  {
+    "id": "prada-water-bottle",
+    "title": "Prada Clear Water Bottle",
+    "category": "craft",
+    "badge": "Workshop Gear",
+    "description": "Ergonomic matte finish lab bottle designed to keep you hydrated during late-night builds.",
+    "fullDescription": "BPA-free high-grade polymer construction with a leak-proof twist cap and ergonomic grip for long lab hours.",
+    "price": "₹899",
+    "priceNumeric": 899,
+    "gumroadUrl": "https://gumroad.com",
+    "image": "Assets/PRADA CLEAR WATER BOTTLE.jpg",
+    "gallery": [
+      "Assets/PRADA CLEAR WATER BOTTLE.jpg"
+    ]
+  },
+  {
+    "id": "stanley-5m-tape",
+    "title": "Stanley 5m Measuring Tape",
+    "category": "craft",
+    "badge": "Workshop Gear",
+    "description": "Industrial-grade locking measuring tape with high-contrast metric scales built for lab builds.",
+    "fullDescription": "Tru-Zero hook for exact inside and outside measurements, wrapped in an impact-resistant ABS case with fractional markings.",
+    "price": "₹449",
+    "priceNumeric": 449,
+    "gumroadUrl": "https://gumroad.com",
+    "image": "Assets/STANLEY 5M.jpg",
+    "gallery": [
+      "Assets/STANLEY 5M.jpg"
+    ]
+  }
+]

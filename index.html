@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OMNIMADE | Hardware & Automation Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://gumroad.com/js/gumroad.js"></script>
+
+  <style>
+    :root {
+      --bg: #05070a;
+      --card-bg: rgba(13, 17, 23, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #3b82f6;
+      --accent-glow: rgba(59, 130, 246, 0.4);
+      --accent-neon: #00f0ff;
+      --text: #f3f4f6;
+      --muted: #8b949e;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --font-main: 'Plus Jakarta Sans', sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 60%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 40px 40px, 40px 40px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 2rem;
+      backdrop-filter: blur(12px);
+      background: rgba(5, 7, 10, 0.9);
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 500;
+    }
+
+    .brand {
+      font-family: var(--font-code);
+      font-weight: 800;
+      font-size: 1.25rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .brand-badge {
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--accent-neon);
+      color: var(--accent-neon);
+      font-size: 0.65rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .nav-actions { display: flex; gap: 1rem; align-items: center; }
+
+    .cart-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .cart-btn:hover { border-color: var(--accent); }
+
+    .cart-count {
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.7rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+
+    .btn-glow {
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      padding: 0.5rem 1.25rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 15px var(--accent-glow);
+      font-size: 0.875rem;
+    }
+
+    .profile-container { position: relative; display: none; }
+    .profile-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 2px solid var(--accent); cursor: pointer; object-fit: cover;
+    }
+
+    .user-menu {
+      position: absolute; right: 0; top: calc(100% + 0.75rem);
+      width: 220px; background: #0d1117; border: 1px solid var(--card-border);
+      border-radius: 10px; padding: 1rem; display: none; flex-direction: column; gap: 0.75rem;
+      z-index: 600;
+    }
+    .user-menu.active { display: flex; }
+    .user-name { font-weight: 700; font-size: 0.9rem; }
+    .user-email { font-family: var(--font-code); font-size: 0.75rem; color: var(--muted); }
+    .btn-signout {
+      background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171; font-family: var(--font-code); font-size: 0.8rem; padding: 0.4rem;
+      border-radius: 6px; cursor: pointer;
+    }
+
+    /* VIEW 1: SHOP CATALOG */
+    #shopView { display: block; }
+    .hero { text-align: center; padding: 4rem 1.5rem 2rem; max-width: 900px; margin: 0 auto; }
+    .hero-tag { font-family: var(--font-code); color: var(--accent-neon); font-size: 0.85rem; margin-bottom: 1rem; }
+    .hero h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1rem; }
+    .hero p { color: var(--muted); font-size: 1rem; max-width: 600px; margin: 0 auto; }
+
+    .section-container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+    .controls { display: flex; justify-content: space-between; margin-bottom: 2rem; border-bottom: 1px solid var(--card-border); padding-bottom: 1rem; }
+    .filters { display: flex; gap: 0.5rem; }
+    .filter-btn {
+      background: transparent; border: 1px solid transparent; color: var(--muted);
+      padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; font-family: var(--font-code); cursor: pointer;
+    }
+    .filter-btn.active, .filter-btn:hover { background: var(--card-bg); border-color: var(--card-border); color: var(--text); }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+    .card {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 12px; overflow: hidden; transition: all 0.3s; display: flex; flex-direction: column;
+    }
+    .card:hover { transform: translateY(-4px); border-color: var(--accent); }
+    .card-thumb-wrap { width: 100%; height: 220px; background: #080c14; display: flex; align-items: center; justify-content: center; padding: 0.5rem; border-bottom: 1px solid var(--card-border); cursor: pointer; }
+    .card-thumb { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+    .card-body { padding: 1.25rem; display: flex; flex-direction: column; flex-grow: 1; }
+    .tag { font-family: var(--font-code); font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 4px; background: rgba(59, 130, 246, 0.1); color: var(--accent); border: 1px solid rgba(59, 130, 246, 0.2); width: fit-content; }
+    .card-title { font-size: 1.1rem; font-weight: 700; margin: 0.5rem 0; cursor: pointer; }
+    .card-title:hover { color: var(--accent-neon); }
+    .card-desc { color: var(--muted); font-size: 0.85rem; line-height: 1.4; margin-bottom: 1.25rem; flex-grow: 1; }
+    
+    .card-actions-group { display: flex; gap: 0.5rem; width: 100%; margin-top: 0.75rem; }
+    .btn-cart { flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-border); color: #fff; font-weight: 600; padding: 0.5rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-family: var(--font-code); }
+    .btn-cart:hover { border-color: var(--accent); }
+    .btn-buy { flex: 1; background: var(--accent); color: #fff; font-weight: 700; padding: 0.5rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.8rem; font-family: var(--font-code); }
+
+    /* VIEW 2: FULL-SCREEN PRODUCT PAGE */
+    #productPageView {
+      display: none;
+      min-height: calc(100vh - 80px);
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 5rem;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--accent-neon);
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      transition: all 0.2s ease;
+    }
+
+    .back-btn:hover {
+      border-color: var(--accent-neon);
+      background: rgba(0, 240, 255, 0.08);
+    }
+
+    .product-page-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    @media(max-width: 850px) {
+      .product-page-grid { grid-template-columns: 1fr; gap: 2rem; }
+    }
+
+    .product-gallery-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .product-hero-stage {
+      background: #080c14;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .product-hero-stage img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .gallery-thumbs-row {
+      display: flex;
+      gap: 0.75rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+
+    .thumb-btn {
+      width: 70px;
+      height: 70px;
+      background: #080c14;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 0.25rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .thumb-btn img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .thumb-btn.active, .thumb-btn:hover {
+      border-color: var(--accent-neon);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .product-details-panel { display: flex; flex-direction: column; }
+    .product-title-large { font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 800; line-height: 1.1; margin: 0.75rem 0; }
+    
+    .price-box { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+    .price-large { font-family: var(--font-code); font-size: 1.75rem; font-weight: 800; color: var(--accent-neon); }
+
+    .action-row { display: flex; gap: 1rem; margin: 1.5rem 0 2.5rem; }
+    .btn-action-large { flex: 1; padding: 1rem; border-radius: 8px; font-weight: 800; font-family: var(--font-code); font-size: 0.95rem; cursor: pointer; text-align: center; }
+    .btn-cart-large { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-border); color: #fff; }
+    .btn-buy-large { background: var(--accent); border: none; color: #fff; box-shadow: 0 0 20px var(--accent-glow); }
+
+    /* Reviews Container */
+    .reviews-container { border-top: 1px solid var(--card-border); padding-top: 2rem; margin-top: 2rem; }
+    .star-rating { display: flex; gap: 0.25rem; margin: 0.75rem 0; cursor: pointer; color: #eab308; font-size: 1.25rem; }
+    .review-input { width: 100%; background: #080c14; border: 1px solid var(--card-border); color: #fff; padding: 0.75rem; border-radius: 8px; font-family: var(--font-main); margin-bottom: 0.75rem; }
+    .auth-error-msg { color: var(--danger); font-size: 0.85rem; font-family: var(--font-code); display: none; margin-bottom: 0.75rem; }
+
+    /* Slide-out Cart Drawer */
+    .cart-drawer {
+      position: fixed; right: -400px; top: 0; width: 380px; height: 100%;
+      background: #0d1117; border-left: 1px solid var(--card-border);
+      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.7); z-index: 1000;
+      transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1); padding: 1.5rem;
+      display: flex; flex-direction: column;
+    }
+    .cart-drawer.active { right: 0; }
+    .cart-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 1rem; }
+    .cart-items { flex-grow: 1; overflow-y: auto; margin: 1rem 0; display: flex; flex-direction: column; gap: 1rem; }
+    .cart-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--card-border); padding: 0.75rem; border-radius: 8px; }
+    
+    .coupon-box { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .coupon-input { flex: 1; background: #05070a; border: 1px solid var(--card-border); color: #fff; padding: 0.5rem; border-radius: 6px; font-family: var(--font-code); font-size: 0.8rem; text-transform: uppercase; }
+    .btn-apply-coupon { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--card-border); color: #fff; font-family: var(--font-code); font-size: 0.75rem; padding: 0 0.75rem; border-radius: 6px; cursor: pointer; }
+
+    .cart-footer { border-top: 1px solid var(--card-border); padding-top: 1rem; }
+    .checkout-btn { width: 100%; background: #22c55e; color: #000; font-weight: 800; padding: 0.85rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-family: var(--font-code); }
+
+    footer { text-align: center; padding: 2rem; border-top: 1px solid var(--card-border); color: var(--muted); font-size: 0.8rem; font-family: var(--font-code); }
+  </style>
+</head>
+<body>
+
+  <!-- Persistent Top Navigation Bar -->
+  <nav>
+    <a href="javascript:void(0)" class="brand" id="navHomeLink">
+      OMNI<span style="color: var(--accent);">MADE</span>
+      <span class="brand-badge">V1.0</span>
+    </a>
+    
+    <div class="nav-actions">
+      <button class="cart-btn" id="openCartBtn">
+        🛒 CART <span class="cart-count" id="cartBadge">0</span>
+      </button>
+
+      <button class="btn-glow" id="signInBtn">Sign In</button>
+
+      <div class="profile-container" id="profileContainer">
+        <img id="userAvatar" class="profile-avatar" src="" alt="User" />
+        <div class="user-menu" id="userMenu">
+          <span class="user-name" id="userName">User Name</span>
+          <span class="user-email" id="userEmail">user@gmail.com</span>
+          <button class="btn-signout" id="signOutBtn">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- VIEW 1: MAIN SHOP CATALOG -->
+  <div id="shopView">
+    <section class="hero">
+      <span class="hero-tag">// HARDWARE &amp; AUTOMATION LAB</span>
+      <h1>CRAFTED HARDWARE.<br>CUSTOM CODE DROPS.</h1>
+      <p>Custom Edison builds, hardware automation kits, and open-source scripts.</p>
+    </section>
+
+    <main class="section-container">
+      <div class="controls">
+        <div class="filters">
+          <button class="filter-btn active" data-filter="all">ALL</button>
+          <button class="filter-btn" data-filter="craft">HARDWARE DROPS</button>
+          <button class="filter-btn" data-filter="code">SCRIPTS &amp; SCHEMATICS</button>
+        </div>
+      </div>
+
+      <div id="grid" class="grid"></div>
+    </main>
+  </div>
+
+  <!-- VIEW 2: FULL-SCREEN PRODUCT PAGE -->
+  <div id="productPageView">
+    <button class="back-btn" id="backToShopBtn">&larr; BACK TO SHOP</button>
+
+    <div class="product-page-grid">
+      <!-- Interactive Gallery Section -->
+      <div class="product-gallery-container">
+        <div class="product-hero-stage">
+          <img id="pageImg" src="" alt="Product Drop">
+        </div>
+        <div class="gallery-thumbs-row" id="galleryThumbs"></div>
+      </div>
+
+      <div class="product-details-panel">
+        <span class="tag" id="pageBadge">HARDWARE DROP</span>
+        <h1 class="product-title-large" id="pageTitle">Product Name</h1>
+        
+        <div class="price-box">
+          <span class="price-large" id="pagePrice">₹0</span>
+        </div>
+
+        <p id="pageDesc" style="color: var(--muted); font-size: 1rem; line-height: 1.6;"></p>
+
+        <div class="action-row">
+          <button class="btn-action-large btn-cart-large" id="pageAddCartBtn">ADD TO CART</button>
+          <button class="btn-action-large btn-buy-large" id="pageBuyBtn">BUY NOW</button>
+        </div>
+
+        <!-- Reviews Box -->
+        <div class="reviews-container">
+          <h3 style="font-family: var(--font-code);">REVIEWS &amp; RATINGS</h3>
+          
+          <div class="auth-error-msg" id="authError">⚠️ Please sign in with Google to leave a review.</div>
+          
+          <div class="star-rating" id="starRating">
+            <span data-star="1">★</span><span data-star="2">★</span><span data-star="3">★</span><span data-star="4">★</span><span data-star="5">★</span>
+          </div>
+
+          <input type="text" class="review-input" id="reviewText" placeholder="Write your thoughts on this drop...">
+          <button class="btn-glow" id="submitReviewBtn" style="width: fit-content;">Post Review</button>
+
+          <div id="reviewList" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide-out Cart Drawer -->
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <h3 style="font-family: var(--font-code);">YOUR LAB CART</h3>
+      <button id="closeCartBtn" style="background:none; border:none; color:var(--muted); font-size:1.5rem; cursor:pointer;">&times;</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    
+    <div class="coupon-box">
+      <input type="text" class="coupon-input" id="couponInput" placeholder="PROMO CODE">
+      <button class="btn-apply-coupon" id="applyCouponBtn">APPLY</button>
+    </div>
+
+    <div class="cart-footer">
+      <div style="display:flex; justify-content:space-between; margin-bottom: 1rem; font-family: var(--font-code);">
+        <span>TOTAL:</span>
+        <span id="cartTotal" style="color: var(--accent-neon); font-weight: bold;">₹0</span>
+      </div>
+      <button class="checkout-btn" id="checkoutBtn">PROCEED TO CHECKOUT</button>
+    </div>
+  </div>
+
+  <footer>
+    SYSTEM ACTIVE &bull; OMNIMADE 2026
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithPopup, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, where, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGF8vVav1M4FFWtZ0ADXsVvTl8hPqGuhM",
+      authDomain: "omnimade-6f515.firebaseapp.com",
+      projectId: "omnimade-6f515",
+      storageBucket: "omnimade-6f515.firebasestorage.app",
+      messagingSenderId: "93197356307",
+      appId: "1:93197356307:web:6cc2cd99135c778c9e5ee6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    let currentUser = null;
+    let isUserAdmin = false;
+    let projects = [];
+    let selectedRating = 5;
+    let activeProductId = null;
+    let unsubscribeReviews = null;
+    let currentReviewsList = [];
+
+    // --- Persistent Cart System (localStorage) ---
+    let cart = JSON.parse(localStorage.getItem('omnimade_cart')) || [];
+
+    function saveCart() {
+      localStorage.setItem('omnimade_cart', JSON.stringify(cart));
+      updateCartUI();
+    }
+
+    // Auth Handlers
+    document.getElementById('signInBtn').addEventListener('click', () => {
+      signInWithPopup(auth, provider).catch(() => signInWithRedirect(auth, provider));
+    });
+
+    document.getElementById('userAvatar').addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('userMenu').classList.toggle('active');
+    });
+
+    document.addEventListener('click', () => document.getElementById('userMenu').classList.remove('active'));
+
+    document.getElementById('signOutBtn').addEventListener('click', () => {
+      signOut(auth).then(() => {
+        document.getElementById('userMenu').classList.remove('active');
+        isUserAdmin = false;
+      });
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      if (user) {
+        document.getElementById('signInBtn').style.display = 'none';
+        document.getElementById('profileContainer').style.display = 'block';
+        document.getElementById('userAvatar').src = user.photoURL || 'https://lh3.googleusercontent.com/a/default-user';
+        document.getElementById('userName').innerText = user.displayName || 'Subscriber';
+        document.getElementById('userEmail').innerText = user.email || '';
+        document.getElementById('authError').style.display = 'none';
+
+        // Check if current user exists in admins collection
+        try {
+          const adminDoc = await getDoc(doc(db, "admins", user.email));
+          isUserAdmin = adminDoc.exists();
+        } catch (e) {
+          isUserAdmin = false;
+        }
+
+      } else {
+        document.getElementById('signInBtn').style.display = 'block';
+        document.getElementById('profileContainer').style.display = 'none';
+        isUserAdmin = false;
+      }
+
+      if (activeProductId) renderReviewsList(currentReviewsList);
+    });
+
+    // Catalog Loader
+    async function initCatalog() {
+      try {
+        const res = await fetch('./projects.json');
+        projects = await res.json();
+        renderGrid(projects);
+        updateCartUI();
+      } catch (err) {
+        console.error("JSON Error:", err);
+      }
+    }
+
+    function renderGrid(items) {
+      document.getElementById('grid').innerHTML = items.map(item => `
+        <div class="card">
+          <div class="card-thumb-wrap" onclick="openProductPage('${item.id}')">
+            <img src="${item.image}" class="card-thumb" alt="${item.title}">
+          </div>
+          <div class="card-body">
+            <span class="tag">${item.badge || 'DROP'}</span>
+            <h3 class="card-title" onclick="openProductPage('${item.id}')">${item.title}</h3>
+            <p class="card-desc">${item.description}</p>
+            <div style="font-family: var(--font-code); font-weight:700; font-size:1.1rem; margin-bottom: 0.5rem;">${item.price}</div>
+            <div class="card-actions-group">
+              <button class="btn-cart" onclick="addToCart('${item.id}')">ADD TO CART</button>
+              <button class="btn-buy" onclick="buyNow('${item.id}')">BUY NOW</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Navigation Switches & Gallery View
+    window.openProductPage = function(id) {
+      const item = projects.find(p => p.id === id);
+      if (!item) return;
+      activeProductId = id;
+
+      document.getElementById('pageImg').src = item.image;
+      document.getElementById('pageTitle').innerText = item.title;
+      document.getElementById('pagePrice').innerText = item.price;
+      document.getElementById('pageBadge').innerText = item.badge || 'DROP';
+      document.getElementById('pageDesc').innerText = item.fullDescription || item.description;
+
+      const thumbsContainer = document.getElementById('galleryThumbs');
+      const galleryList = (item.gallery && item.gallery.length > 0) ? item.gallery : [item.image];
+
+      thumbsContainer.innerHTML = galleryList.map((imgUrl, idx) => `
+        <button class="thumb-btn ${idx === 0 ? 'active' : ''}" onclick="switchMainImage('${imgUrl}', this)">
+          <img src="${imgUrl}" alt="Angle ${idx + 1}">
+        </button>
+      `).join('');
+
+      document.getElementById('pageAddCartBtn').onclick = () => addToCart(id);
+      document.getElementById('pageBuyBtn').onclick = () => buyNow(id);
+
+      listenToReviews(id);
+
+      document.getElementById('shopView').style.display = 'none';
+      document.getElementById('productPageView').style.display = 'block';
+      window.scrollTo(0, 0);
+    };
+
+    window.switchMainImage = function(imgUrl, btnElement) {
+      document.getElementById('pageImg').src = imgUrl;
+      document.querySelectorAll('.thumb-btn').forEach(b => b.classList.remove('active'));
+      btnElement.classList.add('active');
+    };
+
+    function showShopView() {
+      document.getElementById('productPageView').style.display = 'none';
+      document.getElementById('shopView').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    document.getElementById('backToShopBtn').addEventListener('click', showShopView);
+    document.getElementById('navHomeLink').addEventListener('click', showShopView);
+
+    // Buy & Cart Operations
+    window.buyNow = function(id) {
+      const item = projects.find(p => p.id === id);
+      if (item && item.gumroadUrl) window.open(item.gumroadUrl, '_blank');
+    };
+
+    window.addToCart = function(id) {
+      const item = projects.find(p => p.id === id);
+      if (item) {
+        cart.push(item);
+        saveCart();
+        document.getElementById('cartDrawer').classList.add('active');
+      }
+    };
+
+    function updateCartUI() {
+      document.getElementById('cartBadge').innerText = cart.length;
+      document.getElementById('cartItems').innerHTML = cart.map((item, idx) => `
+        <div class="cart-item">
+          <div>
+            <div style="font-weight:bold; font-size:0.85rem;">${item.title}</div>
+            <div style="color:var(--accent-neon); font-size:0.8rem;">${item.price}</div>
+          </div>
+          <button onclick="removeFromCart(${idx})" style="background:none; border:none; color:var(--danger); cursor:pointer;">✕</button>
+        </div>
+      `).join('');
+
+      const total = cart.reduce((sum, item) => sum + (item.priceNumeric || 0), 0);
+      document.getElementById('cartTotal').innerText = `₹${total.toLocaleString('en-IN')}`;
+    }
+
+    window.removeFromCart = function(idx) {
+      cart.splice(idx, 1);
+      saveCart();
+    };
+
+    // Firestore Live Reviews Listener
+    function listenToReviews(productId) {
+      if (unsubscribeReviews) unsubscribeReviews();
+
+      const q = query(collection(db, "reviews"), where("productId", "==", productId));
+      
+      unsubscribeReviews = onSnapshot(q, (snapshot) => {
+        currentReviewsList = [];
+        snapshot.forEach((docSnap) => {
+          currentReviewsList.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        renderReviewsList(currentReviewsList);
+      });
+    }
+
+    // Star Selection UI
+    document.querySelectorAll('#starRating span').forEach(star => {
+      star.addEventListener('click', (e) => {
+        selectedRating = parseInt(e.target.getAttribute('data-star'));
+        document.querySelectorAll('#starRating span').forEach((s, idx) => {
+          s.style.color = idx < selectedRating ? '#eab308' : '#374151';
+        });
+      });
+    });
+
+    // Write Review (Binds User ID)
+    document.getElementById('submitReviewBtn').addEventListener('click', async () => {
+      if (!currentUser) {
+        document.getElementById('authError').style.display = 'block';
+        return;
+      }
+      
+      const txt = document.getElementById('reviewText').value.trim();
+      if (!txt) return;
+
+      try {
+        await addDoc(collection(db, "reviews"), {
+          productId: activeProductId,
+          userId: currentUser.uid, // Attached for ownership check
+          author: currentUser.displayName ? currentUser.displayName.split(' ')[0] : 'Member',
+          rating: selectedRating,
+          text: txt,
+          createdAt: new Date().toISOString()
+        });
+
+        document.getElementById('reviewText').value = '';
+      } catch (err) {
+        console.error("Error saving review:", err);
+      }
+    });
+
+    // Render Reviews with Ownership / Admin Delete Control
+    function renderReviewsList(list) {
+      document.getElementById('reviewList').innerHTML = list.map(r => {
+        const isAuthor = currentUser && currentUser.uid === r.userId;
+        const canDelete = isAuthor || isUserAdmin;
+
+        return `
+          <div style="background:#080c14; border:1px solid var(--card-border); padding:0.75rem; border-radius:8px; font-size:0.85rem; display:flex; justify-content:space-between; align-items:flex-start;">
+            <div style="flex-grow:1;">
+              <div style="color:var(--accent-neon); font-weight:bold; font-family:var(--font-code);">${r.author} (${'★'.repeat(r.rating)}) ${isAuthor ? '<span style="color:var(--muted); font-size:0.7rem;">(You)</span>' : ''}</div>
+              <div style="color:var(--muted); margin-top:0.25rem;">${r.text}</div>
+            </div>
+            ${canDelete ? `<button onclick="deleteReview('${r.id}')" style="background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); color:#f87171; border-radius:4px; padding:0.2rem 0.5rem; cursor:pointer; font-size:0.75rem; font-family:var(--font-code);">DELETE</button>` : ''}
+          </div>
+        `;
+      }).join('') || '<span style="color:var(--muted); font-size:0.85rem;">No reviews yet. Be the first to drop feedback!</span>';
+    }
+
+    // Delete Function
+    window.deleteReview = async function(reviewId) {
+      if (confirm("Are you sure you want to delete this review?")) {
+        try {
+          await deleteDoc(doc(db, "reviews", reviewId));
+        } catch (err) {
+          console.error("Permission denied or error deleting review:", err);
+          alert("Error: You do not have permission to delete this review.");
+        }
+      }
+    };
+
+    // Cart Drawer Controls
+    document.getElementById('openCartBtn').onclick = () => document.getElementById('cartDrawer').classList.add('active');
+    document.getElementById('closeCartBtn').onclick = () => document.getElementById('cartDrawer').classList.remove('active');
+
+    document.getElementById('checkoutBtn').onclick = () => {
+      if (cart.length === 0) return alert('Your cart is empty!');
+      window.open(cart[0].gumroadUrl, '_blank');
+    };
+
+    // Category Filter Controls
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        const f = e.target.getAttribute('data-filter');
+        if (f === 'all') renderGrid(projects);
+        else renderGrid(projects.filter(p => p.category === f));
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', initCatalog);
+  </script>
+</body>
+</html>
