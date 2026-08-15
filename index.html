@@ -256,7 +256,9 @@
 
     /* --- RARITY SYSTEM STYLING --- */
     .rarity-badge {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
       padding: 0.2rem 0.5rem;
       font-size: 0.65rem;
       font-weight: 800;
@@ -288,16 +290,45 @@
       box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
     }
     .rarity-legendary {
-      background: rgba(245, 158, 11, 0.15);
-      color: #f59e0b;
-      border: 1px solid #f59e0b;
-      box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+      background: linear-gradient(135deg, #2a1f05 0%, #150808 100%);
+      color: #fbbf24;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.35), inset 0 0 5px rgba(239, 68, 68, 0.4);
     }
-    .rarity-vaulted {
-      background: rgba(239, 68, 68, 0.15);
-      color: #ef4444;
-      border: 1px solid #ef4444;
-      box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
+
+    /* VAULTED COMPACT BADGE (READABLE ON SMALL CARDS) */
+    .rarity-vaulted-compact {
+      background: linear-gradient(135deg, #090203 0%, #1d0306 100%);
+      color: #ff3b56;
+      border: 1px solid #d4af37;
+      box-shadow: 0 0 10px rgba(255, 0, 51, 0.45), inset 0 0 6px rgba(212, 175, 55, 0.3);
+      padding: 0.22rem 0.6rem;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .rarity-vaulted-compact:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 16px rgba(255, 0, 51, 0.75);
+    }
+    .vault-mini-spin {
+      transform-origin: center;
+      animation: miniWheelSpin 12s infinite linear;
+    }
+    @keyframes miniWheelSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* VAULTED FULL HERO BANNER (PRODUCT DETAIL VIEW) */
+    .vaulted-hero-banner-wrap {
+      width: 100%;
+      margin: 0.5rem 0 1.25rem;
+      filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.45));
+      cursor: pointer;
     }
 
     /* MODAL POPUPS */
@@ -721,10 +752,13 @@
       <div class="product-details-panel">
         <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
           <span class="tag" id="pageBadge">HARDWARE DROP</span>
-          <span class="rarity-badge" id="pageRarityBadge"></span>
+          <div id="pageRarityContainer"></div>
         </div>
         <h1 class="product-title-large" id="pageTitle">Product Name</h1>
         
+        <!-- Large Banner Art Container for Vaulted Drops -->
+        <div id="pageVaultedBannerArea"></div>
+
         <div class="price-box">
           <span class="price-large" id="pagePrice">₹0</span>
         </div>
@@ -759,7 +793,7 @@
 
   <!-- RARITY POPUP MODAL -->
   <div id="rarityModal" class="popup-modal">
-    <div class="popup-modal-content" style="text-align:center; max-width:380px;">
+    <div class="popup-modal-content" style="text-align:center; max-width:400px;">
       <h3 id="modalTitle">Item Rarity Status</h3>
       <p id="modalMade">Total Units Made: 0</p>
       <p id="modalFuture">Future Runs: None</p>
@@ -883,7 +917,7 @@
     let activeCoupon = null;
     let liveStockMap = {};
 
-    // --- Persistent Cart System (localStorage) ---
+    // --- Persistent Cart System ---
     let cart = JSON.parse(localStorage.getItem('omnimade_cart')) || [];
 
     function saveCart() {
@@ -926,21 +960,39 @@
     // --- RARITY POPUP MODAL HANDLER ---
     window.showRarityDetails = function(e, title, rarity, madeCount, futurePlan) {
       if (e) e.stopPropagation();
-      document.getElementById('modalTitle').innerText = `${title} [${(rarity || 'DROP').toUpperCase()}]`;
-      document.getElementById('modalMade').innerText = `Batch Produced: ${madeCount || 'Custom Run'} units`;
-      document.getElementById('modalFuture').innerText = `Future Production: ${futurePlan || 'On Demand'}`;
+      const r = (rarity || 'drop').toLowerCase();
+      
+      document.getElementById('modalTitle').innerText = `${title} [${r.toUpperCase()}]`;
       
       const statusEl = document.getElementById('modalStatus');
-      const planStr = (futurePlan || '').toLowerCase();
-      if (planStr.includes('never') || planStr.includes('vaulted')) {
-        statusEl.innerText = "STATUS: VAULTED / NEVER PRODUCED AGAIN";
+      const madeEl = document.getElementById('modalMade');
+      const futureEl = document.getElementById('modalFuture');
+
+      if (r === 'vaulted') {
+        madeEl.innerText = "Provenance: 2 Units Total (01/02 Maker Archive • 02/02 Public Release)";
+        futureEl.innerText = "Packaging: Custom hand-carved wooden presentation art case";
+        statusEl.innerText = "STATUS: PERMANENTLY VAULTED • NEVER TO BE PRODUCED AGAIN";
         statusEl.style.color = "var(--danger)";
-      } else if (planStr.includes('active') || planStr.includes('continuous')) {
+      } else if (r === 'legendary') {
+        madeEl.innerText = `Batch Produced: ${madeCount || '25'} units`;
+        futureEl.innerText = `Future Production: ${futurePlan || '5-50 Units / Year (Limited Cap)'}`;
+        statusEl.innerText = "STATUS: LEGENDARY LAB RUN";
+        statusEl.style.color = "var(--accent-gold)";
+      } else if (r === 'rare') {
+        madeEl.innerText = `Batch Produced: ${madeCount || '75'} units`;
+        futureEl.innerText = `Future Production: ${futurePlan || 'Quarterly Limited Drops'}`;
+        statusEl.innerText = "STATUS: LIMITED BATCH";
+        statusEl.style.color = "var(--accent)";
+      } else if (r === 'uncommon') {
+        madeEl.innerText = `Batch Produced: ${madeCount || '150'} units`;
+        futureEl.innerText = `Future Production: ${futurePlan || 'Active Batches'}`;
         statusEl.innerText = "STATUS: ACTIVE RUN";
         statusEl.style.color = "var(--accent-green)";
       } else {
-        statusEl.innerText = "STATUS: LIMITED BATCH";
-        statusEl.style.color = "var(--accent-gold)";
+        madeEl.innerText = `Batch Produced: ${madeCount || '500+'} units`;
+        futureEl.innerText = `Future Production: Continuous Stock`;
+        statusEl.innerText = "STATUS: STANDARD ISSUE";
+        statusEl.style.color = "var(--muted)";
       }
 
       document.getElementById('rarityModal').style.display = 'flex';
@@ -1025,13 +1077,165 @@
       if (activeProductId) renderReviewsList(currentReviewsList);
     });
 
-    // --- CATALOG LOADER (SYNC STOCK AND RENDER) ---
+    // --- RENDER DUAL-TIER RARITY BADGES (COMPACT & FULL HERO) ---
+    function renderRarityBadgeHTML(item, isCardView = true) {
+      const rarity = (item.rarity || 'common').toLowerCase();
+      const rarityLabel = item.rarityLabel || rarity.toUpperCase();
+      const madeCount = item.madeCount || '50';
+      const futurePlan = item.futurePlan || 'Limited Runs';
+      const clickHandler = `onclick="showRarityDetails(event, '${item.title.replace(/'/g, "\\'")}', '${rarity}', '${madeCount}', '${futurePlan}')"`;
+
+      if (rarity === 'vaulted') {
+        if (isCardView) {
+          // Compact, ultra-readable card badge with animated micro-wheel
+          return `
+            <span class="rarity-vaulted-compact" ${clickHandler}>
+              <svg width="14" height="14" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="14" stroke="#d4af37" stroke-width="2" fill="#0b0204"/>
+                <g class="vault-mini-spin">
+                  <line x1="16" y1="4" x2="16" y2="28" stroke="#d4af37" stroke-width="2.2" stroke-linecap="round"/>
+                  <line x1="4" y1="16" x2="28" y2="16" stroke="#d4af37" stroke-width="2.2" stroke-linecap="round"/>
+                  <line x1="7.5" y1="7.5" x2="24.5" y2="24.5" stroke="#d4af37" stroke-width="2.2" stroke-linecap="round"/>
+                  <line x1="7.5" y1="24.5" x2="24.5" y2="7.5" stroke="#d4af37" stroke-width="2.2" stroke-linecap="round"/>
+                  <circle cx="16" cy="16" r="8" fill="none" stroke="#ff1744" stroke-width="1.8"/>
+                </g>
+                <circle cx="16" cy="16" r="3.5" fill="#ffd700"/>
+              </svg>
+              <span>VAULTED // 1 OF 1</span>
+            </span>
+          `;
+        } else {
+          // Full-featured, symmetrically locked Hero Banner for Product Pages
+          return `
+            <div class="vaulted-hero-banner-wrap" ${clickHandler}>
+              <svg class="rarity-badge-banner" viewBox="0 0 540 120" width="100%" height="auto" style="overflow: visible;" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="v-plate-bg" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#050102" /><stop offset="20%" stop-color="#190407" /><stop offset="50%" stop-color="#2d0208" /><stop offset="80%" stop-color="#190407" /><stop offset="100%" stop-color="#050102" />
+                  </linearGradient>
+                  <linearGradient id="steel-plate-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#3d434d" /><stop offset="35%" stop-color="#1c1f24" /><stop offset="65%" stop-color="#292e36" /><stop offset="100%" stop-color="#0f1114" />
+                  </linearGradient>
+                  <linearGradient id="steel-bevel-light" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#9aa3af" /><stop offset="50%" stop-color="#4f5762" /><stop offset="100%" stop-color="#1a1d22" />
+                  </linearGradient>
+                  <linearGradient id="spoke-gold-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#78350f" /><stop offset="30%" stop-color="#fef08a" /><stop offset="60%" stop-color="#d97706" /><stop offset="100%" stop-color="#451a03" />
+                  </linearGradient>
+                  <linearGradient id="v-gold-radiant" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#fff6b3" /><stop offset="25%" stop-color="#f59e0b" /><stop offset="50%" stop-color="#d97706" /><stop offset="75%" stop-color="#fbbf24" /><stop offset="100%" stop-color="#78350f" />
+                  </linearGradient>
+                  <radialGradient id="v-natural-radial-glow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#ff1744" stop-opacity="1" /><stop offset="35%" stop-color="#ff003b" stop-opacity="0.85" /><stop offset="60%" stop-color="#99001b" stop-opacity="0.35" /><stop offset="100%" stop-color="#ff003b" stop-opacity="0" />
+                  </radialGradient>
+                  <radialGradient id="vault-recess-cone" cx="45%" cy="45%" r="55%">
+                    <stop offset="0%" stop-color="#3d0309" /><stop offset="40%" stop-color="#1a0104" /><stop offset="75%" stop-color="#080102" /><stop offset="100%" stop-color="#000000" />
+                  </radialGradient>
+                  <linearGradient id="v-sweep-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="transparent" /><stop offset="45%" stop-color="rgba(255, 215, 0, 0.08)" /><stop offset="50%" stop-color="rgba(255, 255, 255, 0.65)" /><stop offset="55%" stop-color="rgba(255, 215, 0, 0.2)" /><stop offset="100%" stop-color="transparent" />
+                  </linearGradient>
+                  <clipPath id="shield-clip">
+                    <path d="M 60 33 L 215 33 L 232 23 L 308 23 L 325 33 L 480 33 L 522 60 L 480 87 L 325 87 L 308 97 L 232 97 L 215 87 L 60 87 L 18 60 Z" />
+                  </clipPath>
+                  <g id="vault-perimeter-bolt">
+                    <rect x="-2" y="-39" width="4" height="6.5" rx="1.5" fill="url(#spoke-gold-grad)" stroke="#000000" stroke-width="0.5" />
+                    <circle cx="0" cy="-30" r="1.6" fill="url(#v-gold-radiant)" stroke="#000000" stroke-width="0.4" />
+                  </g>
+                  <g id="dial-tick-unit">
+                    <line x1="0" y1="-26.5" x2="0" y2="-24.5" stroke="#ff1744" stroke-width="1.2" stroke-linecap="round" />
+                  </g>
+                  <g id="turnstile-spoke-pair">
+                    <line x1="0" y1="-37" x2="0" y2="37" stroke="url(#spoke-gold-grad)" stroke-width="2.8" stroke-linecap="round" />
+                    <circle cx="0" cy="-37" r="1.8" fill="url(#v-gold-radiant)" stroke="#000000" stroke-width="0.5" />
+                    <circle cx="0" cy="37" r="1.8" fill="url(#v-gold-radiant)" stroke="#000000" stroke-width="0.5" />
+                  </g>
+                </defs>
+                <circle cx="270" cy="60" r="58" fill="url(#v-natural-radial-glow)" class="heroic-radial-aura" />
+                <g clip-path="url(#shield-clip)">
+                  <path d="M 60 33 L 215 33 L 232 23 L 308 23 L 325 33 L 480 33 L 522 60 L 480 87 L 325 87 L 308 97 L 232 97 L 215 87 L 60 87 L 18 60 Z" fill="url(#v-plate-bg)" stroke="url(#v-gold-radiant)" stroke-width="2" />
+                  <path d="M 63 38 L 212 38 L 229 28 L 311 28 L 328 38 L 477 38 L 514 60 L 477 82 L 328 82 L 311 92 L 229 92 L 212 82 L 63 82 L 26 60 Z" fill="none" stroke="#7f1d1d" stroke-width="1.2" stroke-dasharray="6,3" />
+                  <rect x="0" y="0" width="220" height="120" fill="url(#v-sweep-grad)" class="gold-shimmer-pass" transform="skewX(-25)" />
+                </g>
+                <polygon points="270,16 280,23 270,30 260,23" fill="#080204" stroke="url(#v-gold-radiant)" stroke-width="1.5" />
+                <polygon points="270,90 280,97 270,104 260,97" fill="#080204" stroke="url(#v-gold-radiant)" stroke-width="1.5" />
+                <path d="M 14 60 L 34 38 L 40 38 L 24 60 L 40 82 L 34 82 Z" fill="url(#v-gold-radiant)" opacity="0.8" />
+                <polyline points="48,35 30,60 48,85" fill="none" stroke="url(#v-gold-radiant)" stroke-width="2" class="wing-pulse" />
+                <path d="M 526 60 L 506 38 L 500 38 L 516 60 L 500 82 L 506 82 Z" fill="url(#v-gold-radiant)" opacity="0.8" />
+                <polyline points="492,35 510,60 492,85" fill="none" stroke="url(#v-gold-radiant)" stroke-width="2" class="wing-pulse" />
+                <g fill="url(#v-gold-radiant)" stroke="#000000" stroke-width="0.5">
+                  <circle cx="66" cy="42" r="2.5" /><circle cx="474" cy="42" r="2.5" /><circle cx="66" cy="78" r="2.5" /><circle cx="474" cy="78" r="2.5" />
+                </g>
+                <g>
+                  <path d="M 74 43 L 66 51 L 66 69 L 74 77" fill="none" stroke="url(#v-gold-radiant)" stroke-width="1.4" opacity="0.7" />
+                  <text x="82" y="56" class="heroic-glow-text" font-family="'JetBrains Mono', monospace" font-size="13.5" font-weight="900" letter-spacing="4">VAULTED</text>
+                  <text x="82" y="71" fill="#fbbf24" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" letter-spacing="1.2">BATCH // 01 OF 02</text>
+                  <line x1="192" y1="60" x2="216" y2="60" stroke="url(#v-gold-radiant)" stroke-width="1.2" stroke-dasharray="3,3" />
+                </g>
+                <g>
+                  <path d="M 466 43 L 474 51 L 474 69 L 466 77" fill="none" stroke="url(#v-gold-radiant)" stroke-width="1.4" opacity="0.7" />
+                  <line x1="324" y1="60" x2="348" y2="60" stroke="url(#v-gold-radiant)" stroke-width="1.2" stroke-dasharray="3,3" />
+                  <text x="360" y="56" class="heroic-glow-text" font-family="'JetBrains Mono', monospace" font-size="13.5" font-weight="900" letter-spacing="3.5">PROVENANCE</text>
+                  <text x="360" y="71" fill="#fbbf24" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" letter-spacing="1.2">NEVER REPRODUCED</text>
+                </g>
+                <g>
+                  <rect x="228" y="18" width="84" height="84" rx="10" fill="url(#steel-plate-grad)" stroke="url(#steel-bevel-light)" stroke-width="2" />
+                  <rect x="231" y="21" width="78" height="78" rx="8" fill="none" stroke="#000000" stroke-width="1" />
+                  <g fill="#1a1d22" stroke="url(#v-gold-radiant)" stroke-width="0.8">
+                    <circle cx="236" cy="26" r="3" /><circle cx="304" cy="26" r="3" /><circle cx="236" cy="94" r="3" /><circle cx="304" cy="94" r="3" />
+                  </g>
+                  <circle cx="270" cy="60" r="38" fill="url(#steel-plate-grad)" stroke="#000000" stroke-width="1.5" />
+                  <circle cx="270" cy="60" r="36" fill="none" stroke="url(#steel-bevel-light)" stroke-width="1.8" />
+                  <circle cx="270" cy="60" r="32" fill="url(#vault-recess-cone)" stroke="#000000" stroke-width="2" />
+                  <g transform="translate(270, 60)">
+                    <use href="#vault-perimeter-bolt" /><use href="#vault-perimeter-bolt" transform="rotate(45)" /><use href="#vault-perimeter-bolt" transform="rotate(90)" /><use href="#vault-perimeter-bolt" transform="rotate(135)" /><use href="#vault-perimeter-bolt" transform="rotate(180)" /><use href="#vault-perimeter-bolt" transform="rotate(225)" /><use href="#vault-perimeter-bolt" transform="rotate(270)" /><use href="#vault-perimeter-bolt" transform="rotate(315)" />
+                  </g>
+                  <circle cx="270" cy="60" r="26" fill="none" stroke="#7f1d1d" stroke-width="1.2" />
+                  <g transform="translate(270, 60)">
+                    <use href="#dial-tick-unit" /><use href="#dial-tick-unit" transform="rotate(30)" /><use href="#dial-tick-unit" transform="rotate(60)" /><use href="#dial-tick-unit" transform="rotate(90)" /><use href="#dial-tick-unit" transform="rotate(120)" /><use href="#dial-tick-unit" transform="rotate(150)" /><use href="#dial-tick-unit" transform="rotate(180)" /><use href="#dial-tick-unit" transform="rotate(210)" /><use href="#dial-tick-unit" transform="rotate(240)" /><use href="#dial-tick-unit" transform="rotate(270)" /><use href="#dial-tick-unit" transform="rotate(300)" /><use href="#dial-tick-unit" transform="rotate(330)" />
+                  </g>
+                  <circle cx="270" cy="60" r="22" fill="#080103" stroke="url(#v-gold-radiant)" stroke-width="1.2" />
+                  <g class="vault-wheel-spin">
+                    <g transform="translate(270, 60)">
+                      <use href="#turnstile-spoke-pair" /><use href="#turnstile-spoke-pair" transform="rotate(60)" /><use href="#turnstile-spoke-pair" transform="rotate(120)" />
+                    </g>
+                    <circle cx="270" cy="60" r="17" fill="none" stroke="#111317" stroke-width="4.5" />
+                    <circle cx="270" cy="60" r="17" fill="none" stroke="url(#spoke-gold-grad)" stroke-width="3.2" />
+                  </g>
+                  <circle cx="270" cy="60" r="11" fill="url(#steel-plate-grad)" stroke="#000000" stroke-width="1.8" />
+                  <circle cx="270" cy="60" r="9.5" fill="#080204" stroke="url(#v-gold-radiant)" stroke-width="1" />
+                  <g class="easter-egg-msk" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M 264.2 63.6 L 264.2 56.4 L 266.3 59.2 L 268.4 56.4 L 268.4 63.6" fill="none" />
+                    <path d="M 272.2 56.6 C 269.8 56.1 269.6 58.2 270.8 59.3 C 272 60.3 271.8 63.1 269.4 62.7" fill="none" />
+                    <path d="M 273.6 56.4 L 273.6 63.6 M 277 56.4 L 274 59.8 L 277.2 63.6" fill="none" />
+                  </g>
+                  <circle cx="270" cy="60" r="1.8" fill="url(#steel-bevel-light)" stroke="#000000" stroke-width="0.5" />
+                </g>
+              </svg>
+            </div>
+          `;
+        }
+      } else if (rarity === 'legendary') {
+        return `
+          <span class="rarity-badge rarity-legendary" ${clickHandler}>
+            <span style="color:#ef4444; font-size:0.6rem;">★</span> ${rarityLabel}
+          </span>
+        `;
+      } else {
+        return `
+          <span class="rarity-badge rarity-${rarity}" ${clickHandler}>
+            ${rarityLabel}
+          </span>
+        `;
+      }
+    }
+
+    // --- CATALOG LOADER ---
     async function initCatalog() {
       try {
         const res = await fetch('./projects.json?t=' + Date.now());
         projects = await res.json();
 
-        // Sync local products with Firestore inventory collection
+        // Sync with Firestore Inventory
         for (const item of projects) {
           try {
             const docRef = doc(db, "inventory", item.id);
@@ -1058,11 +1262,6 @@
 
     function renderGrid(items) {
       document.getElementById('grid').innerHTML = items.map(item => {
-        const rarity = item.rarity || 'common';
-        const rarityLabel = item.rarityLabel || rarity.toUpperCase();
-        const madeCount = item.madeCount || '50';
-        const futurePlan = item.futurePlan || 'Limited Runs';
-
         const stockLeft = typeof liveStockMap[item.id] === 'number' ? liveStockMap[item.id] : (item.stock ?? 50);
         const isOutOfStock = stockLeft <= 0;
         const isLowStock = stockLeft > 0 && stockLeft < 10;
@@ -1082,9 +1281,7 @@
           <div class="card-body">
             <div class="card-meta-row">
               <span class="tag">${item.badge || 'DROP'}</span>
-              <span class="rarity-badge rarity-${rarity}" onclick="showRarityDetails(event, '${item.title.replace(/'/g, "\\'")}', '${rarity}', '${madeCount}', '${futurePlan}')">
-                ${rarityLabel}
-              </span>
+              ${renderRarityBadgeHTML(item, true)}
             </div>
             <h3 class="card-title" onclick="openProductPage('${item.id}')">${item.title}</h3>
             <p class="card-desc">${item.description}</p>
@@ -1111,11 +1308,17 @@
       document.getElementById('pageBadge').innerText = item.badge || 'DROP';
       document.getElementById('pageDesc').innerText = item.fullDescription || item.description;
 
-      const rarity = item.rarity || 'common';
-      const rBadge = document.getElementById('pageRarityBadge');
-      rBadge.className = `rarity-badge rarity-${rarity}`;
-      rBadge.innerText = item.rarityLabel || rarity.toUpperCase();
-      rBadge.onclick = (e) => showRarityDetails(e, item.title, rarity, item.madeCount || '50', item.futurePlan || 'Limited Runs');
+      const rarity = (item.rarity || 'common').toLowerCase();
+      const rarityContainer = document.getElementById('pageRarityContainer');
+      const bannerArea = document.getElementById('pageVaultedBannerArea');
+
+      if (rarity === 'vaulted') {
+        rarityContainer.innerHTML = renderRarityBadgeHTML(item, true);
+        bannerArea.innerHTML = renderRarityBadgeHTML(item, false);
+      } else {
+        rarityContainer.innerHTML = renderRarityBadgeHTML(item, true);
+        bannerArea.innerHTML = '';
+      }
 
       const thumbsContainer = document.getElementById('galleryThumbs');
       const galleryList = (item.gallery && item.gallery.length > 0) ? item.gallery : [item.image];
@@ -1260,7 +1463,7 @@
       saveCart();
     };
 
-    // Dynamic JSON Promo Code Validator
+    // Dynamic Promo Code Validator
     document.getElementById('applyCouponBtn').addEventListener('click', async () => {
       const inputCode = document.getElementById('couponInput').value.trim().toUpperCase();
       if (!inputCode) return alert('Please enter a promo code.');
@@ -1332,7 +1535,7 @@
               createdAt: serverTimestamp()
             });
 
-            // Automatically decrement stock for each purchased item
+            // Decrement live stock
             for (const orderItem of (orderItems || cart)) {
               if (orderItem.id) {
                 const itemRef = doc(db, "inventory", orderItem.id);
@@ -1518,7 +1721,6 @@
       });
     });
 
-    // Run catalog immediately
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initCatalog);
     } else {
