@@ -1,0 +1,18 @@
+[
+  {
+    "code": "LAUNCH20",
+    "type": "percentage",
+    "value": 20,
+    "minOrderAmount": 500,
+    "expiresAt": "2026-08-31T23:59:59+05:30",
+    "description": "20% off on orders above ₹500"
+  },
+  {
+    "code": "FLAT500",
+    "type": "flat",
+    "value": 500,
+    "minOrderAmount": 2999,
+    "expiresAt": "2026-09-15T23:59:59+05:30",
+    "description": "₹500 flat off on orders above ₹2,999"
+  }
+]
