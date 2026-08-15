@@ -6,12 +6,12 @@
     "badge": "HARDWARE DROP",
     "price": "₹3,499",
     "priceNumeric": 3499,
-    "image": "BOSE HEADPHONES.jpg",
+    "image": "./Assets/BOSE HEADPHONES.jpg",
     "gallery": [
-      "BOSE HEADPHONES.jpg",
-      "BOSE HEADPHONES 2.jpg",
-      "BOSE HEADPHONES 3.jpg",
-      "BOSE HEADPHONES 4.jpg"
+      "./Assets/BOSE HEADPHONES.jpg",
+      "./Assets/BOSE HEADPHONES 2.jpg",
+      "./Assets/BOSE HEADPHONES 3.jpg",
+      "./Assets/BOSE HEADPHONES 4.jpg"
     ],
     "description": "Engineered acoustic drivers with ambient noise isolation and multi-angle folding chassis.",
     "fullDescription": "Custom tuned acoustic architecture built for long studio and development sessions. Features ergonomic soft earcups, active isolation, and a foldable compact design with carrying travel case.",
@@ -27,15 +27,15 @@
     "badge": "HARDWARE DROP",
     "price": "₹499",
     "priceNumeric": 499,
-    "image": "PORTRONICS TOAD ONE.jpg",
+    "image": "./Assets/PORTRONICS TOAD ONE.jpg",
     "gallery": [
-      "PORTRONICS TOAD ONE.jpg"
+      "./Assets/PORTRONICS TOAD ONE.jpg"
     ],
     "description": "Ergonomic multi-mode wireless clicker with optical precision tracking.",
     "fullDescription": "High-efficiency wireless mouse built for workflow productivity and desk setups with quiet switches and fast tracking response.",
     "rarity": "common",
     "rarityLabel": "Common",
-    "madeCount": "67",
+    "madeCount": "500",
     "futurePlan": "Continuous Run"
   },
   {
@@ -45,9 +45,9 @@
     "badge": "LAB DROP",
     "price": "₹899",
     "priceNumeric": 899,
-    "image": "PRADA CLEAR WATER BOTTLE.jpg",
+    "image": "./Assets/PRADA CLEAR WATER BOTTLE.jpg",
     "gallery": [
-      "PRADA CLEAR WATER BOTTLE.jpg"
+      "./Assets/PRADA CLEAR WATER BOTTLE.jpg"
     ],
     "description": "Clear studio hydration vessel with sealed ribbed cap and stealth profile.",
     "fullDescription": "Durable, high-grade transparent studio bottle designed for desk setups and active lab sessions.",
@@ -63,9 +63,9 @@
     "badge": "HARDWARE DROP",
     "price": "₹449",
     "priceNumeric": 449,
-    "image": "STANLEY 5M.jpg",
+    "image": "./Assets/STANLEY 5M.jpg",
     "gallery": [
-      "STANLEY 5M.jpg"
+      "./Assets/STANLEY 5M.jpg"
     ],
     "description": "High-impact polymer casing with smooth lock mechanism and clear rule markings.",
     "fullDescription": "Essential precision measurement tool for workbench planning, 3D modeling alignment, and physical fabrication setups.",
