@@ -235,6 +235,20 @@
     .btn-cart:hover { border-color: var(--accent); }
     .btn-buy { flex: 1; background: var(--accent); color: #fff; font-weight: 700; padding: 0.5rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.8rem; font-family: var(--font-code); }
 
+    /* Stock Status Styling */
+    .stock-warning {
+      color: #ef4444;
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-top: 0.35rem;
+    }
+    .btn-disabled {
+      opacity: 0.45 !important;
+      cursor: not-allowed !important;
+      pointer-events: none !important;
+    }
+
     /* --- RARITY SYSTEM STYLING --- */
     .rarity-badge {
       display: inline-block;
@@ -553,6 +567,46 @@
     .support-icon { font-size: 1.1rem; }
 
     footer { text-align: center; padding: 2rem; border-top: 1px solid var(--card-border); color: var(--muted); font-size: 0.8rem; font-family: var(--font-code); }
+
+    /* =========================================
+       CSS MEDIA QUERIES (MOBILE PHONE FIT)
+    ========================================= */
+    @media (max-width: 640px) {
+      nav {
+        padding: 0.75rem 1rem;
+        gap: 0.5rem;
+      }
+      .brand {
+        font-size: 1rem;
+        gap: 0.4rem;
+      }
+      .brand-icon-svg {
+        width: 22px;
+        height: 22px;
+      }
+      .brand-badge {
+        display: none;
+      }
+      .nav-actions {
+        gap: 0.5rem;
+      }
+      .cart-btn {
+        padding: 0.4rem 0.65rem;
+        font-size: 0.75rem;
+      }
+      .profile-avatar {
+        width: 32px;
+        height: 32px;
+      }
+      .user-menu {
+        right: 0;
+        width: 230px;
+      }
+      .cart-drawer {
+        width: 100%;
+        right: -100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -655,6 +709,8 @@
         </div>
 
         <p id="pageDesc" style="color: var(--muted); font-size: 1rem; line-height: 1.6;"></p>
+
+        <div id="pageStockNotice"></div>
 
         <div class="action-row">
           <button class="btn-action-large btn-cart-large" id="pageAddCartBtn">ADD TO CART</button>
@@ -780,7 +836,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithPopup, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, where, deleteDoc, doc, getDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, where, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCGF8vVav1M4FFWtZ0ADXsVvTl8hPqGuhM",
@@ -804,6 +860,7 @@
     let unsubscribeReviews = null;
     let currentReviewsList = [];
     let activeCoupon = null;
+    let liveStockMap = {};
 
     // --- Persistent Cart System (localStorage) ---
     let cart = JSON.parse(localStorage.getItem('omnimade_cart')) || [];
@@ -947,15 +1004,30 @@
       if (activeProductId) renderReviewsList(currentReviewsList);
     });
 
-    // --- CATALOG LOADER ---
+    // --- CATALOG LOADER WITH FIRESTORE STOCK SYNC ---
     async function initCatalog() {
       try {
-        const res = await fetch('./projects.json');
+        const res = await fetch('./projects.json?t=' + Date.now());
         projects = await res.json();
+
+        // Sync local products with Firestore inventory collection
+        for (const item of projects) {
+          const docRef = doc(db, "inventory", item.id);
+          const snap = await getDoc(docRef);
+
+          if (snap.exists()) {
+            liveStockMap[item.id] = snap.data().stock;
+          } else {
+            const initialCount = typeof item.stock === 'number' ? item.stock : 50;
+            liveStockMap[item.id] = initialCount;
+            await setDoc(docRef, { stock: initialCount, title: item.title });
+          }
+        }
+
         renderGrid(projects);
         updateCartUI();
       } catch (err) {
-        console.error("JSON Error:", err);
+        console.error("JSON/Catalog Error:", err);
       }
     }
 
@@ -965,6 +1037,17 @@
         const rarityLabel = item.rarityLabel || rarity.toUpperCase();
         const madeCount = item.madeCount || '50';
         const futurePlan = item.futurePlan || 'Limited Runs';
+
+        const stockLeft = typeof liveStockMap[item.id] === 'number' ? liveStockMap[item.id] : (item.stock ?? 50);
+        const isOutOfStock = stockLeft <= 0;
+        const isLowStock = stockLeft > 0 && stockLeft < 10;
+
+        let stockNotice = '';
+        if (isOutOfStock) {
+          stockNotice = `<div class="stock-warning">🔴 OUT OF STOCK</div>`;
+        } else if (isLowStock) {
+          stockNotice = `<div class="stock-warning">⚠️ ONLY ${stockLeft} UNITS LEFT!</div>`;
+        }
 
         return `
         <div class="card">
@@ -980,10 +1063,11 @@
             </div>
             <h3 class="card-title" onclick="openProductPage('${item.id}')">${item.title}</h3>
             <p class="card-desc">${item.description}</p>
-            <div style="font-family: var(--font-code); font-weight:700; font-size:1.1rem; margin-bottom: 0.5rem; color: var(--accent-neon);">${item.price}</div>
+            <div style="font-family: var(--font-code); font-weight:700; font-size:1.1rem; color: var(--accent-neon);">${item.price}</div>
+            ${stockNotice}
             <div class="card-actions-group">
-              <button class="btn-cart" onclick="addToCart('${item.id}')">ADD TO CART</button>
-              <button class="btn-buy" onclick="buyNow('${item.id}')">BUY NOW</button>
+              <button class="btn-cart ${isOutOfStock ? 'btn-disabled' : ''}" onclick="addToCart('${item.id}')">${isOutOfStock ? 'OUT OF STOCK' : 'ADD TO CART'}</button>
+              <button class="btn-buy ${isOutOfStock ? 'btn-disabled' : ''}" onclick="buyNow('${item.id}')">${isOutOfStock ? 'SOLD OUT' : 'BUY NOW'}</button>
             </div>
           </div>
         </div>
@@ -1017,8 +1101,36 @@
         </button>
       `).join('');
 
-      document.getElementById('pageAddCartBtn').onclick = () => addToCart(id);
-      document.getElementById('pageBuyBtn').onclick = () => buyNow(id);
+      const stockLeft = typeof liveStockMap[item.id] === 'number' ? liveStockMap[item.id] : (item.stock ?? 50);
+      const isOutOfStock = stockLeft <= 0;
+      const isLowStock = stockLeft > 0 && stockLeft < 10;
+
+      const stockNoticeEl = document.getElementById('pageStockNotice');
+      if (isOutOfStock) {
+        stockNoticeEl.innerHTML = `<div class="stock-warning" style="margin-bottom:1rem;">🔴 OUT OF STOCK</div>`;
+      } else if (isLowStock) {
+        stockNoticeEl.innerHTML = `<div class="stock-warning" style="margin-bottom:1rem;">⚠️ ONLY ${stockLeft} UNITS LEFT!</div>`;
+      } else {
+        stockNoticeEl.innerHTML = '';
+      }
+
+      const cartBtn = document.getElementById('pageAddCartBtn');
+      const buyBtn = document.getElementById('pageBuyBtn');
+
+      if (isOutOfStock) {
+        cartBtn.classList.add('btn-disabled');
+        cartBtn.innerText = 'OUT OF STOCK';
+        buyBtn.classList.add('btn-disabled');
+        buyBtn.innerText = 'SOLD OUT';
+      } else {
+        cartBtn.classList.remove('btn-disabled');
+        cartBtn.innerText = 'ADD TO CART';
+        buyBtn.classList.remove('btn-disabled');
+        buyBtn.innerText = 'BUY NOW';
+      }
+
+      cartBtn.onclick = () => addToCart(id);
+      buyBtn.onclick = () => buyNow(id);
 
       listenToReviews(id);
 
@@ -1047,6 +1159,9 @@
       const item = projects.find(p => p.id === id);
       if (!item) return;
 
+      const stockLeft = typeof liveStockMap[item.id] === 'number' ? liveStockMap[item.id] : (item.stock ?? 50);
+      if (stockLeft <= 0) return alert('Sorry, this drop is currently out of stock.');
+
       cart.push(item);
       saveCart();
 
@@ -1058,6 +1173,9 @@
     window.addToCart = function(id) {
       const item = projects.find(p => p.id === id);
       if (item) {
+        const stockLeft = typeof liveStockMap[item.id] === 'number' ? liveStockMap[item.id] : (item.stock ?? 50);
+        if (stockLeft <= 0) return alert('Sorry, this drop is currently out of stock.');
+
         cart.push(item);
         saveCart();
         document.getElementById('cartDrawer').classList.add('active');
@@ -1188,8 +1306,23 @@
               orderStatus: "Confirmed / Synced with Shiprocket",
               createdAt: serverTimestamp()
             });
+
+            // Automatically decrement stock for each purchased item
+            for (const orderItem of (orderItems || cart)) {
+              if (orderItem.id) {
+                const itemRef = doc(db, "inventory", orderItem.id);
+                await updateDoc(itemRef, {
+                  stock: increment(-1)
+                });
+                if (typeof liveStockMap[orderItem.id] === 'number') {
+                  liveStockMap[orderItem.id] = Math.max(0, liveStockMap[orderItem.id] - 1);
+                }
+              }
+            }
+
+            renderGrid(projects);
           } catch (e) {
-            console.error("Firestore order log error:", e);
+            console.error("Firestore order/stock error:", e);
           }
 
           alert("🎉 Payment Successful! Order Reference: " + response.razorpay_payment_id + "\nYour parcel tracking info will be emailed to you.");
