@@ -6,6 +6,7 @@
     "badge": "HARDWARE DROP",
     "price": "₹3,499",
     "priceNumeric": 3499,
+    "stock": 8,
     "image": "./Assets/BOSE HEADPHONES.jpg",
     "gallery": [
       "./Assets/BOSE HEADPHONES.jpg",
@@ -27,6 +28,7 @@
     "badge": "HARDWARE DROP",
     "price": "₹499",
     "priceNumeric": 499,
+    "stock": 45,
     "image": "./Assets/PORTRONICS TOAD ONE.jpg",
     "gallery": [
       "./Assets/PORTRONICS TOAD ONE.jpg"
@@ -45,6 +47,7 @@
     "badge": "LAB DROP",
     "price": "₹899",
     "priceNumeric": 899,
+    "stock": 3,
     "image": "./Assets/PRADA CLEAR WATER BOTTLE.jpg",
     "gallery": [
       "./Assets/PRADA CLEAR WATER BOTTLE.jpg"
@@ -63,6 +66,7 @@
     "badge": "HARDWARE DROP",
     "price": "₹449",
     "priceNumeric": 449,
+    "stock": 0,
     "image": "./Assets/STANLEY 5M.jpg",
     "gallery": [
       "./Assets/STANLEY 5M.jpg"
