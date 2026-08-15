@@ -79,3 +79,24 @@
     "futurePlan": "Limited Runs Every Quarter"
   }
 ]
+
+{
+    "id": "vaulted-core-01",
+    "title": "Omni Core Handheld [1 of 1 Public Unit]",
+    "category": "craft",
+    "badge": "VAULTED ARCHIVE",
+    "price": "₹24,999",
+    "priceNumeric": 24999,
+    "stock": 1,
+    "image": "./Assets/VAULTED_UNIT.jpg",
+    "gallery": [
+      "./Assets/VAULTED_UNIT.jpg",
+      "./Assets/WOODEN_CASE_ART.jpg"
+    ],
+    "description": "Ultra-complex handcrafted build. Unit 02/02. Housed in a custom carved wooden presentation case.",
+    "fullDescription": "Engineered with extreme attention to detail, precision components, and exhaustive hand assembly. Only two pieces exist in the world: Piece 01/02 remains permanently in the Omnimade Maker Archive, and Piece 02/02 is released here. Shipped in a custom carved wooden display case.",
+    "rarity": "vaulted",
+    "rarityLabel": "Vaulted // 1 of 1",
+    "madeCount": "2 (1 Archive / 1 Public)",
+    "futurePlan": "Never to be made again (Permanent Vault)"
+  }
