@@ -86,9 +86,7 @@
       transition: opacity 0.2s ease;
     }
 
-    .brand:hover {
-      opacity: 0.9;
-    }
+    .brand:hover { opacity: 0.9; }
 
     .brand-icon-svg {
       flex-shrink: 0;
@@ -122,7 +120,6 @@
       gap: 0.5rem;
       transition: all 0.2s;
     }
-
     .cart-btn:hover { border-color: var(--accent); }
 
     .cart-count {
@@ -361,7 +358,6 @@
       margin-bottom: 2rem;
       transition: all 0.2s ease;
     }
-
     .back-btn:hover {
       border-color: var(--accent-neon);
       background: rgba(0, 240, 255, 0.08);
@@ -423,13 +419,11 @@
       justify-content: center;
       flex-shrink: 0;
     }
-
     .thumb-btn img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
     }
-
     .thumb-btn.active, .thumb-btn:hover {
       border-color: var(--accent-neon);
       box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
@@ -443,13 +437,42 @@
 
     .action-row { display: flex; gap: 1rem; margin: 1.5rem 0 2.5rem; }
     .btn-action-large { flex: 1; padding: 1rem; border-radius: 8px; font-weight: 800; font-family: var(--font-code); font-size: 0.95rem; cursor: pointer; text-align: center; }
-    .btn-cart-large { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-border); color: #fff; }
+    
+    /* Contrast Fixes for Buttons */
+    .btn-cart-large { 
+      background: rgba(255, 255, 255, 0.08); 
+      border: 1px solid var(--card-border); 
+      color: var(--text); 
+      transition: all 0.2s ease;
+    }
+    [data-theme="light"] .btn-cart-large {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      color: #0f172a;
+    }
+    .btn-cart-large:hover {
+      border-color: var(--accent);
+    }
+
     .btn-buy-large { background: var(--accent); border: none; color: #fff; box-shadow: 0 0 20px var(--accent-glow); }
 
     /* Reviews Container */
     .reviews-container { border-top: 1px solid var(--card-border); padding-top: 2rem; margin-top: 2rem; }
     .star-rating { display: flex; gap: 0.25rem; margin: 0.75rem 0; cursor: pointer; color: #eab308; font-size: 1.25rem; }
-    .review-input { width: 100%; background: #080c14; border: 1px solid var(--card-border); color: #fff; padding: 0.75rem; border-radius: 8px; font-family: var(--font-main); margin-bottom: 0.75rem; }
+    .review-input { 
+      width: 100%; 
+      background: rgba(255, 255, 255, 0.04); 
+      border: 1px solid var(--card-border); 
+      color: var(--text); 
+      padding: 0.75rem; 
+      border-radius: 8px; 
+      font-family: var(--font-main); 
+      margin-bottom: 0.75rem; 
+    }
+    [data-theme="light"] .review-input {
+      background: #ffffff;
+      border-color: #cbd5e1;
+    }
     .auth-error-msg { color: var(--danger); font-size: 0.85rem; font-family: var(--font-code); display: none; margin-bottom: 0.75rem; }
 
     /* Slide-out Cart Drawer */
@@ -467,11 +490,67 @@
     .cart-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--card-border); padding: 0.75rem; border-radius: 8px; }
     
     .coupon-box { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-    .coupon-input { flex: 1; background: #05070a; border: 1px solid var(--card-border); color: #fff; padding: 0.5rem; border-radius: 6px; font-family: var(--font-code); font-size: 0.8rem; text-transform: uppercase; }
-    .btn-apply-coupon { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--card-border); color: #fff; font-family: var(--font-code); font-size: 0.75rem; padding: 0 0.75rem; border-radius: 6px; cursor: pointer; }
+    .coupon-input { 
+      flex: 1; 
+      background: rgba(255, 255, 255, 0.04); 
+      border: 1px solid var(--card-border); 
+      color: var(--text); 
+      padding: 0.5rem 0.75rem; 
+      border-radius: 6px; 
+      font-family: var(--font-code); 
+      font-size: 0.8rem; 
+      text-transform: uppercase; 
+    }
+    [data-theme="light"] .coupon-input {
+      background: #ffffff;
+      border-color: #cbd5e1;
+    }
+    
+    /* Apply Button Contrast Fix */
+    .btn-apply-coupon { 
+      background: var(--accent); 
+      border: 1px solid var(--accent); 
+      color: #ffffff; 
+      font-family: var(--font-code); 
+      font-size: 0.75rem; 
+      font-weight: 700;
+      padding: 0 1rem; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      transition: opacity 0.2s ease;
+    }
+    .btn-apply-coupon:hover {
+      opacity: 0.9;
+    }
 
     .cart-footer { border-top: 1px solid var(--card-border); padding-top: 1rem; }
     .checkout-btn { width: 100%; background: #22c55e; color: #000; font-weight: 800; padding: 0.85rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-family: var(--font-code); }
+
+    /* Support Channels Styling */
+    .support-link-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      text-decoration: none;
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+      margin-top: 0.5rem;
+    }
+    [data-theme="light"] .support-link-card {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+    }
+    .support-link-card:hover {
+      border-color: var(--accent-neon);
+      transform: translateY(-2px);
+    }
+    .support-icon { font-size: 1.1rem; }
 
     footer { text-align: center; padding: 2rem; border-top: 1px solid var(--card-border); color: var(--muted); font-size: 0.8rem; font-family: var(--font-code); }
   </style>
@@ -512,7 +591,7 @@
           </button>
           
           <button class="menu-item-btn" id="openSupportBtn">
-            <span>💬</span> Support &amp; Contact
+            <span>💬</span> Support &amp; Community
           </button>
 
           <div class="theme-controls-box">
@@ -634,16 +713,40 @@
     </div>
   </div>
 
-  <!-- SUPPORT MODAL -->
+  <!-- SUPPORT MODAL WITH DISCORD & INSTAGRAM -->
   <div id="supportModal" class="popup-modal">
     <div class="popup-modal-content">
-      <h3>💬 Omnimade Lab Support</h3>
-      <p style="margin-bottom:1rem;">Direct inquiries, bulk drops, or technical questions:</p>
-      <div style="background:rgba(255,255,255,0.03); border:1px solid var(--card-border); padding:0.85rem; border-radius:8px; font-family:var(--font-code); font-size:0.8rem; line-height:1.8;">
+      <h3>💬 Omnimade Support &amp; Lab Channels</h3>
+      <p style="margin-bottom:0.75rem;">Join our community or get direct support on drops:</p>
+
+      <a href="https://discord.gg/5zv35H5u7" target="_blank" rel="noopener" class="support-link-card">
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <span class="support-icon">👾</span>
+          <div>
+            <div style="font-weight:700;">Join Discord Lab</div>
+            <div style="font-size:0.7rem; color:var(--muted);">Live dev chat &amp; drop updates</div>
+          </div>
+        </div>
+        <span style="color:var(--accent-neon); font-size:0.8rem;">JOIN &rarr;</span>
+      </a>
+
+      <a href="https://instagram.com/omnimade.lab" target="_blank" rel="noopener" class="support-link-card">
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <span class="support-icon">📸</span>
+          <div>
+            <div style="font-weight:700;">Instagram</div>
+            <div style="font-size:0.7rem; color:var(--muted);">Behind-the-scenes &amp; teardowns</div>
+          </div>
+        </div>
+        <span style="color:var(--accent-neon); font-size:0.8rem;">VISIT &rarr;</span>
+      </a>
+
+      <div style="background:rgba(255,255,255,0.03); border:1px solid var(--card-border); padding:0.75rem; border-radius:8px; font-family:var(--font-code); font-size:0.75rem; line-height:1.6; margin-top:0.75rem;">
         <div><strong>Email:</strong> gamerindian840@gmail.com</div>
         <div><strong>Origin:</strong> Bikaner, Rajasthan</div>
         <div><strong>Dispatch:</strong> 2:00 PM – 10:00 PM IST</div>
       </div>
+      
       <button class="close-modal-btn" id="closeSupportBtn">CLOSE</button>
     </div>
   </div>
