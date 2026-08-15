@@ -730,12 +730,12 @@
         <span style="color:var(--accent-neon); font-size:0.8rem;">JOIN &rarr;</span>
       </a>
 
-     <a href="https://instagram.com/mohd_shahid_kohri" target="_blank" rel="noopener" class="support-link-card">
+      <a href="https://instagram.com/mohd_shahid_kohri" target="_blank" rel="noopener" class="support-link-card">
         <div style="display:flex; align-items:center; gap:0.6rem;">
           <span class="support-icon">📸</span>
           <div>
-            <div style="font-weight:700;">Instagram</div>
-            <div style="font-size:0.7rem; color:var(--muted);">Behind-the-scenes &amp; teardowns</div>
+            <div style="font-weight:700;">Instagram (@mohd_shahid_kohri)</div>
+            <div style="font-size:0.7rem; color:var(--muted);">Direct message &amp; build logs</div>
           </div>
         </div>
         <span style="color:var(--accent-neon); font-size:0.8rem;">VISIT &rarr;</span>
@@ -803,7 +803,7 @@
     let activeProductId = null;
     let unsubscribeReviews = null;
     let currentReviewsList = [];
-    let discountMultiplier = 0.0;
+    let activeCoupon = null;
 
     // --- Persistent Cart System (localStorage) ---
     let cart = JSON.parse(localStorage.getItem('omnimade_cart')) || [];
@@ -1047,12 +1047,12 @@
       const item = projects.find(p => p.id === id);
       if (!item) return;
 
-      if (item.razorpayUrl) {
-        window.open(item.razorpayUrl, '_blank');
-      } else {
-        const itemPrice = item.priceNumeric || parseInt((item.price || '').replace(/[^0-9]/g, '')) || 1;
-        triggerRazorpayPayment(itemPrice, `Order: ${item.title}`, [item]);
-      }
+      cart.push(item);
+      saveCart();
+
+      document.getElementById('productPageView').style.display = 'none';
+      document.getElementById('shopView').style.display = 'block';
+      document.getElementById('cartDrawer').classList.add('active');
     };
 
     window.addToCart = function(id) {
@@ -1066,10 +1066,11 @@
 
     function updateCartUI() {
       document.getElementById('cartBadge').innerText = cart.length;
-      
+
       const cartContainer = document.getElementById('cartItems');
       if (cart.length === 0) {
         cartContainer.innerHTML = '<div style="color:var(--muted); font-size:0.85rem; text-align:center; padding: 2rem 0;">Your cart is empty.</div>';
+        activeCoupon = null;
       } else {
         cartContainer.innerHTML = cart.map((item, idx) => `
           <div class="cart-item">
@@ -1082,9 +1083,33 @@
         `).join('');
       }
 
-      const rawTotal = cart.reduce((sum, item) => sum + (item.priceNumeric || parseInt((item.price || '').replace(/[^0-9]/g, '')) || 0), 0);
-      const discountedTotal = Math.max(0, Math.round(rawTotal - (rawTotal * discountMultiplier)));
-      document.getElementById('cartTotal').innerText = `₹${discountedTotal.toLocaleString('en-IN')}`;
+      const rawTotal = cart.reduce((sum, item) => {
+        return sum + (item.priceNumeric || parseInt((item.price || '').replace(/[^0-9]/g, '')) || 0);
+      }, 0);
+
+      let discountAmount = 0;
+      if (activeCoupon) {
+        if (rawTotal >= activeCoupon.minOrderAmount) {
+          if (activeCoupon.type === 'percentage') {
+            discountAmount = Math.round((rawTotal * activeCoupon.value) / 100);
+          } else if (activeCoupon.type === 'flat') {
+            discountAmount = activeCoupon.value;
+          }
+        } else {
+          activeCoupon = null;
+        }
+      }
+
+      const finalTotal = Math.max(0, rawTotal - discountAmount);
+
+      if (discountAmount > 0) {
+        document.getElementById('cartTotal').innerHTML = `
+          <span style="text-decoration: line-through; color: var(--muted); font-size: 0.8rem; margin-right: 0.4rem;">₹${rawTotal.toLocaleString('en-IN')}</span>
+          <span>₹${finalTotal.toLocaleString('en-IN')}</span>
+        `;
+      } else {
+        document.getElementById('cartTotal').innerText = `₹${finalTotal.toLocaleString('en-IN')}`;
+      }
     }
 
     window.removeFromCart = function(idx) {
@@ -1092,16 +1117,47 @@
       saveCart();
     };
 
-    document.getElementById('applyCouponBtn').addEventListener('click', () => {
-      const code = document.getElementById('couponInput').value.trim().toUpperCase();
-      if (code === 'AUGUST20') {
-        discountMultiplier = 0.20;
-        alert('Promo code AUGUST20 applied: 20% OFF!');
+    // Dynamic JSON Promo Code Validator
+    document.getElementById('applyCouponBtn').addEventListener('click', async () => {
+      const inputCode = document.getElementById('couponInput').value.trim().toUpperCase();
+      if (!inputCode) return alert('Please enter a promo code.');
+
+      try {
+        const res = await fetch('./coupons.json?t=' + Date.now());
+        const couponList = await res.json();
+
+        const coupon = couponList.find(c => c.code.toUpperCase() === inputCode);
+
+        if (!coupon) {
+          activeCoupon = null;
+          updateCartUI();
+          return alert('❌ Invalid promo code.');
+        }
+
+        const expiryDate = new Date(coupon.expiresAt);
+        if (new Date() > expiryDate) {
+          activeCoupon = null;
+          updateCartUI();
+          return alert('⏰ This promo code has expired.');
+        }
+
+        const rawTotal = cart.reduce((sum, item) => {
+          return sum + (item.priceNumeric || parseInt((item.price || '').replace(/[^0-9]/g, '')) || 0);
+        }, 0);
+
+        if (rawTotal < coupon.minOrderAmount) {
+          activeCoupon = null;
+          updateCartUI();
+          return alert(`⚠️ Minimum order amount of ₹${coupon.minOrderAmount} required to use this code.`);
+        }
+
+        activeCoupon = coupon;
+        alert(`🎉 Promo code ${coupon.code} applied: ${coupon.description || 'Discount activated!'}`);
         updateCartUI();
-      } else if (!code) {
-        alert('Please enter a promo code.');
-      } else {
-        alert('Invalid Promo Code');
+
+      } catch (err) {
+        console.error('Error reading coupons.json:', err);
+        alert('Unable to load promo codes. Please try again.');
       }
     });
 
@@ -1159,7 +1215,17 @@
       if (cart.length === 0) return alert('Your cart is empty!');
 
       const rawTotal = cart.reduce((sum, item) => sum + (item.priceNumeric || parseInt((item.price || '').replace(/[^0-9]/g, '')) || 0), 0);
-      const finalAmount = Math.max(1, Math.round(rawTotal - (rawTotal * discountMultiplier)));
+      
+      let discountAmount = 0;
+      if (activeCoupon && rawTotal >= activeCoupon.minOrderAmount) {
+        if (activeCoupon.type === 'percentage') {
+          discountAmount = Math.round((rawTotal * activeCoupon.value) / 100);
+        } else if (activeCoupon.type === 'flat') {
+          discountAmount = activeCoupon.value;
+        }
+      }
+
+      const finalAmount = Math.max(1, rawTotal - discountAmount);
 
       triggerRazorpayPayment(finalAmount, `Order of ${cart.length} item(s) from Lab Cart`, [...cart]);
     };
