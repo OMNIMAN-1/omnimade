@@ -2,867 +2,421 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- O//M Circular Monogram Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 4C9.37 4 4 9.37 4 16C4 22.63 9.37 28 16 28C22.63 28 28 22.63 28 16' fill='none' stroke='%233b82f6' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M11 20V12L16 16.5L21 12V20' fill='none' stroke='%2300f0ff' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>OMNIMADE | Hardware &amp; Automation Lab</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OMNIMADE | Hardware & Drops</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Razorpay Checkout -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
+  <!-- Firebase App & Firestore SDKs (v9 Compat for clean inline scripting) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
   <style>
-    :root {
-      --bg: #05070a;
-      --card-bg: rgba(13, 17, 23, 0.85);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --accent: #3b82f6;
-      --accent-glow: rgba(59, 130, 246, 0.4);
-      --accent-neon: #00f0ff;
-      --accent-green: #22c55e;
-      --accent-gold: #f59e0b;
-      --text: #f3f4f6;
-      --muted: #8b949e;
-      --danger: #ef4444;
-      --font-main: 'Plus Jakarta Sans', sans-serif;
-      --font-code: 'JetBrains Mono', monospace;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
+    /* Smooth transitions for theme toggles */
     body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: var(--font-main);
-      min-height: 100vh;
-      overflow-x: hidden;
-      background-image: 
-        radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 60%),
-        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-      background-size: 100% 100%, 40px 40px, 40px 40px;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
-
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.25rem 2rem;
-      backdrop-filter: blur(12px);
-      background: rgba(5, 7, 10, 0.9);
-      border-bottom: 1px solid var(--card-border);
-      position: sticky;
-      top: 0;
-      z-index: 500;
-    }
-
-    .brand {
-      font-family: var(--font-code);
-      font-weight: 800;
-      font-size: 1.25rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.65rem;
-      text-decoration: none;
-      color: var(--text);
-      cursor: pointer;
-      user-select: none;
-      transition: opacity 0.2s ease;
-    }
-
-    .brand:hover {
-      opacity: 0.9;
-    }
-
-    .brand-icon-svg {
-      flex-shrink: 0;
-      filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.35));
-    }
-
-    .brand-badge {
-      background: rgba(0, 240, 255, 0.1);
-      border: 1px solid var(--accent-neon);
-      color: var(--accent-neon);
-      font-size: 0.65rem;
-      padding: 0.15rem 0.4rem;
-      border-radius: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .nav-actions { display: flex; gap: 1rem; align-items: center; }
-
-    .cart-btn {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--card-border);
-      color: var(--text);
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      font-family: var(--font-code);
-      font-size: 0.85rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.2s;
-    }
-
-    .cart-btn:hover { border-color: var(--accent); }
-
-    .cart-count {
-      background: var(--accent);
-      color: #fff;
-      font-size: 0.7rem;
-      padding: 0.1rem 0.4rem;
-      border-radius: 10px;
-      font-weight: bold;
-    }
-
-    .btn-glow {
-      background: var(--accent);
-      color: #fff;
-      font-weight: 600;
-      padding: 0.5rem 1.25rem;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 0 15px var(--accent-glow);
-      font-size: 0.875rem;
-    }
-
-    .profile-container { position: relative; display: none; }
-    .profile-avatar {
-      width: 40px; height: 40px; border-radius: 50%;
-      border: 2px solid var(--accent); cursor: pointer; object-fit: cover;
-    }
-
-    .user-menu {
-      position: absolute; right: 0; top: calc(100% + 0.75rem);
-      width: 220px; background: #0d1117; border: 1px solid var(--card-border);
-      border-radius: 10px; padding: 1rem; display: none; flex-direction: column; gap: 0.75rem;
-      z-index: 600;
-    }
-    .user-menu.active { display: flex; }
-    .user-name { font-weight: 700; font-size: 0.9rem; }
-    .user-email { font-family: var(--font-code); font-size: 0.75rem; color: var(--muted); }
-    .btn-signout {
-      background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #f87171; font-family: var(--font-code); font-size: 0.8rem; padding: 0.4rem;
-      border-radius: 6px; cursor: pointer;
-    }
-
-    /* VIEW 1: SHOP CATALOG */
-    #shopView { display: block; }
-    .hero { text-align: center; padding: 4rem 1.5rem 2rem; max-width: 900px; margin: 0 auto; }
-    .hero-tag { font-family: var(--font-code); color: var(--accent-neon); font-size: 0.85rem; margin-bottom: 1rem; }
-    .hero h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1rem; }
-    .hero p { color: var(--muted); font-size: 1rem; max-width: 600px; margin: 0 auto; }
-
-    .section-container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
-    .controls { display: flex; justify-content: space-between; margin-bottom: 2rem; border-bottom: 1px solid var(--card-border); padding-bottom: 1rem; }
-    .filters { display: flex; gap: 0.5rem; }
-    .filter-btn {
-      background: transparent; border: 1px solid transparent; color: var(--muted);
-      padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; font-family: var(--font-code); cursor: pointer;
-    }
-    .filter-btn.active, .filter-btn:hover { background: var(--card-bg); border-color: var(--card-border); color: var(--text); }
-
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
-    .card {
-      background: var(--card-bg); border: 1px solid var(--card-border);
-      border-radius: 12px; overflow: hidden; transition: all 0.3s; display: flex; flex-direction: column;
-    }
-    .card:hover { transform: translateY(-4px); border-color: var(--accent); }
-    .card-thumb-wrap { width: 100%; height: 220px; background: #080c14; display: flex; align-items: center; justify-content: center; padding: 0.5rem; border-bottom: 1px solid var(--card-border); cursor: pointer; }
-    .card-thumb { max-width: 100%; max-height: 100%; object-fit: contain; }
-
-    .card-body { padding: 1.25rem; display: flex; flex-direction: column; flex-grow: 1; }
-    
-    .card-meta-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem;
-      gap: 0.5rem;
-    }
-
-    .tag { font-family: var(--font-code); font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 4px; background: rgba(59, 130, 246, 0.1); color: var(--accent); border: 1px solid rgba(59, 130, 246, 0.2); width: fit-content; }
-    .card-title { font-size: 1.1rem; font-weight: 700; margin: 0.25rem 0 0.5rem; cursor: pointer; }
-    .card-title:hover { color: var(--accent-neon); }
-    .card-desc { color: var(--muted); font-size: 0.85rem; line-height: 1.4; margin-bottom: 1.25rem; flex-grow: 1; }
-    
-    .card-actions-group { display: flex; gap: 0.5rem; width: 100%; margin-top: 0.75rem; }
-    .btn-cart { flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-border); color: #fff; font-weight: 600; padding: 0.5rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-family: var(--font-code); }
-    .btn-cart:hover { border-color: var(--accent); }
-    .btn-buy { flex: 1; background: var(--accent); color: #fff; font-weight: 700; padding: 0.5rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.8rem; font-family: var(--font-code); }
-
-    /* --- RARITY SYSTEM STYLING --- */
-    .rarity-badge {
-      display: inline-block;
-      padding: 0.2rem 0.5rem;
-      font-size: 0.65rem;
-      font-weight: 800;
-      font-family: var(--font-code);
-      text-transform: uppercase;
-      border-radius: 4px;
-      cursor: pointer;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-    .rarity-badge:hover { transform: scale(1.05); }
-
-    .rarity-common {
-      background: #1f2937;
-      color: #9ca3af;
-      border: 1px solid #374151;
-    }
-    .rarity-uncommon {
-      background: rgba(34, 197, 94, 0.15);
-      color: #22c55e;
-      border: 1px solid #22c55e;
-      box-shadow: 0 0 6px rgba(34, 197, 94, 0.2);
-    }
-    .rarity-rare {
-      background: rgba(59, 130, 246, 0.15);
-      color: #3b82f6;
-      border: 1px solid #3b82f6;
-      box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
-    }
-    .rarity-legendary {
-      background: rgba(245, 158, 11, 0.15);
-      color: #f59e0b;
-      border: 1px solid #f59e0b;
-      box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
-    }
-    .rarity-vaulted {
-      background: rgba(239, 68, 68, 0.15);
-      color: #ef4444;
-      border: 1px solid #ef4444;
-      box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
-    }
-
-    /* RARITY MODAL POPUP */
-    .rarity-modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(6px);
-      z-index: 2000;
-      align-items: center;
-      justify-content: center;
-    }
-    .rarity-modal-content {
-      background: #0d1117;
-      border: 1px solid var(--card-border);
-      padding: 1.5rem;
-      border-radius: 12px;
-      max-width: 380px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
-    }
-    .rarity-modal-content h3 {
-      font-family: var(--font-code);
-      font-size: 1.15rem;
-      margin-bottom: 0.75rem;
-    }
-    .rarity-modal-content p {
-      color: var(--muted);
-      font-size: 0.85rem;
-      margin: 0.4rem 0;
-    }
-    .status-highlight {
-      font-family: var(--font-code);
-      font-weight: 700;
-      margin-top: 0.85rem !important;
-      padding: 0.5rem;
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.04);
-      font-size: 0.8rem;
-    }
-    .close-modal-btn {
-      margin-top: 1.25rem;
-      background: #1f2937;
-      border: 1px solid var(--card-border);
-      color: #fff;
-      padding: 0.5rem 1.25rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-family: var(--font-code);
-      font-size: 0.8rem;
-    }
-
-    /* VIEW 2: FULL-SCREEN PRODUCT PAGE */
-    #productPageView {
-      display: none;
-      min-height: calc(100vh - 80px);
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2.5rem 1.5rem 5rem;
-    }
-
-    .back-btn {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--card-border);
-      color: var(--accent-neon);
-      font-family: var(--font-code);
-      font-size: 0.85rem;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 2rem;
-      transition: all 0.2s ease;
-    }
-
-    .back-btn:hover {
-      border-color: var(--accent-neon);
-      background: rgba(0, 240, 255, 0.08);
-    }
-
-    .product-page-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 3rem;
-      align-items: start;
-    }
-
-    @media(max-width: 850px) {
-      .product-page-grid { grid-template-columns: 1fr; gap: 2rem; }
-    }
-
-    .product-gallery-container {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      width: 100%;
-    }
-
-    .product-hero-stage {
-      background: #080c14;
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      height: 420px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-    }
-
-    .product-hero-stage img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
-
-    .gallery-thumbs-row {
-      display: flex;
-      gap: 0.75rem;
-      overflow-x: auto;
-      padding-bottom: 0.5rem;
-    }
-
-    .thumb-btn {
-      width: 70px;
-      height: 70px;
-      background: #080c14;
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 0.25rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .thumb-btn img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
-
-    .thumb-btn.active, .thumb-btn:hover {
-      border-color: var(--accent-neon);
-      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
-    }
-
-    .product-details-panel { display: flex; flex-direction: column; }
-    .product-title-large { font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 800; line-height: 1.1; margin: 0.75rem 0; }
-    
-    .price-box { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
-    .price-large { font-family: var(--font-code); font-size: 1.75rem; font-weight: 800; color: var(--accent-neon); }
-
-    .action-row { display: flex; gap: 1rem; margin: 1.5rem 0 2.5rem; }
-    .btn-action-large { flex: 1; padding: 1rem; border-radius: 8px; font-weight: 800; font-family: var(--font-code); font-size: 0.95rem; cursor: pointer; text-align: center; }
-    .btn-cart-large { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-border); color: #fff; }
-    .btn-buy-large { background: var(--accent); border: none; color: #fff; box-shadow: 0 0 20px var(--accent-glow); }
-
-    /* Reviews Container */
-    .reviews-container { border-top: 1px solid var(--card-border); padding-top: 2rem; margin-top: 2rem; }
-    .star-rating { display: flex; gap: 0.25rem; margin: 0.75rem 0; cursor: pointer; color: #eab308; font-size: 1.25rem; }
-    .review-input { width: 100%; background: #080c14; border: 1px solid var(--card-border); color: #fff; padding: 0.75rem; border-radius: 8px; font-family: var(--font-main); margin-bottom: 0.75rem; }
-    .auth-error-msg { color: var(--danger); font-size: 0.85rem; font-family: var(--font-code); display: none; margin-bottom: 0.75rem; }
-
-    /* Slide-out Cart Drawer */
-    .cart-drawer {
-      position: fixed; right: -400px; top: 0; width: 380px; height: 100%;
-      background: #0d1117; border-left: 1px solid var(--card-border);
-      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.7); z-index: 1000;
-      transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1); padding: 1.5rem;
-      display: flex; flex-direction: column;
-    }
-    .cart-drawer.active { right: 0; }
-    .cart-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 1rem; }
-    .cart-items { flex-grow: 1; overflow-y: auto; margin: 1rem 0; display: flex; flex-direction: column; gap: 0.75rem; }
-    .cart-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--card-border); padding: 0.75rem; border-radius: 8px; }
-    
-    .coupon-box { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-    .coupon-input { flex: 1; background: #05070a; border: 1px solid var(--card-border); color: #fff; padding: 0.5rem; border-radius: 6px; font-family: var(--font-code); font-size: 0.8rem; text-transform: uppercase; }
-    .btn-apply-coupon { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--card-border); color: #fff; font-family: var(--font-code); font-size: 0.75rem; padding: 0 0.75rem; border-radius: 6px; cursor: pointer; }
-
-    .cart-footer { border-top: 1px solid var(--card-border); padding-top: 1rem; }
-    .checkout-btn { width: 100%; background: #22c55e; color: #000; font-weight: 800; padding: 0.85rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-family: var(--font-code); }
-
-    footer { text-align: center; padding: 2rem; border-top: 1px solid var(--card-border); color: var(--muted); font-size: 0.8rem; font-family: var(--font-code); }
   </style>
 </head>
-<body>
 
-  <!-- Persistent Top Navigation Bar -->
-  <nav>
-    <a href="javascript:void(0)" class="brand" id="navHomeLink">
-      <!-- O//M Circular Monogram SVG (Electric Blue & Cyan) -->
-      <svg class="brand-icon-svg" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Outer Glowing Cut-Ring "O" -->
-        <path d="M16 3.5C9.1 3.5 3.5 9.1 3.5 16C3.5 22.9 9.1 28.5 16 28.5C22.9 28.5 28.5 22.9 28.5 16" stroke="#3b82f6" stroke-width="3" stroke-linecap="round"/>
-        <!-- Inner Center "M" Core -->
-        <path d="M10.5 20.5V11.5L16 16.5L21.5 11.5V20.5" stroke="#00f0ff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <span>OMNI<span style="color: var(--accent);">MADE</span></span>
-      <span class="brand-badge">V1.0</span>
-    </a>
-    
-    <div class="nav-actions">
-      <button class="cart-btn" id="openCartBtn">
-        🛒 CART <span class="cart-count" id="cartBadge">0</span>
-      </button>
+<body class="bg-gray-50 text-gray-900 dark:bg-slate-950 dark:text-gray-100 min-h-screen flex flex-col font-sans antialiased">
 
-      <button class="btn-glow" id="signInBtn">Sign In</button>
-
-      <div class="profile-container" id="profileContainer">
-        <img id="userAvatar" class="profile-avatar" src="" alt="User" />
-        <div class="user-menu" id="userMenu">
-          <span class="user-name" id="userName">User Name</span>
-          <span class="user-email" id="userEmail">user@gmail.com</span>
-          <button class="btn-signout" id="signOutBtn">Sign Out</button>
+  <!-- ================= NAVBAR ================= -->
+  <header class="sticky top-0 z-40 w-full border-b border-gray-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-black text-xl shadow-md">
+          Ω
         </div>
-      </div>
-    </div>
-  </nav>
-
-  <!-- VIEW 1: MAIN SHOP CATALOG -->
-  <div id="shopView">
-    <section class="hero">
-      <span class="hero-tag">// HARDWARE &amp; AUTOMATION LAB</span>
-      <h1>CRAFTED HARDWARE.<br>CUSTOM CODE DROPS.</h1>
-      <p>Custom builds, hardware automation kits, and open-source scripts.</p>
-    </section>
-
-    <main class="section-container">
-      <div class="controls">
-        <div class="filters">
-          <button class="filter-btn active" data-filter="all">ALL</button>
-          <button class="filter-btn" data-filter="craft">HARDWARE DROPS</button>
-          <button class="filter-btn" data-filter="code">SCRIPTS &amp; SCHEMATICS</button>
-        </div>
+        <span class="font-bold tracking-tight text-xl bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-violet-400">
+          OMNIMADE
+        </span>
       </div>
 
-      <div id="grid" class="grid"></div>
-    </main>
-  </div>
+      <!-- Center Nav Links -->
+      <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-gray-600 dark:text-gray-300">
+        <a href="#drops" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Drops</a>
+        <a href="#lab" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Lab Projects</a>
+        <button onclick="openModal('aboutModal')" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">About</button>
+      </nav>
 
-  <!-- VIEW 2: FULL-SCREEN PRODUCT PAGE -->
-  <div id="productPageView">
-    <button class="back-btn" id="backToShopBtn">&larr; BACK TO SHOP</button>
-
-    <div class="product-page-grid">
-      <!-- Interactive Gallery Section -->
-      <div class="product-gallery-container">
-        <div class="product-hero-stage">
-          <img id="pageImg" src="" alt="Product Drop">
-        </div>
-        <div class="gallery-thumbs-row" id="galleryThumbs"></div>
-      </div>
-
-      <div class="product-details-panel">
-        <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
-          <span class="tag" id="pageBadge">HARDWARE DROP</span>
-          <span class="rarity-badge" id="pageRarityBadge"></span>
-        </div>
-        <h1 class="product-title-large" id="pageTitle">Product Name</h1>
+      <!-- Right Actions: Auth & Profile Menu -->
+      <div class="flex items-center space-x-4">
         
-        <div class="price-box">
-          <span class="price-large" id="pagePrice">₹0</span>
-        </div>
+        <!-- Logged Out State -->
+        <button id="loginBtn" onclick="handleGoogleSignIn()" class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+          Sign In
+        </button>
 
-        <p id="pageDesc" style="color: var(--muted); font-size: 1rem; line-height: 1.6;"></p>
+        <!-- Logged In State: Profile Dropdown Button -->
+        <div id="userProfileContainer" class="relative hidden">
+          <button id="profileDropdownBtn" onclick="toggleProfileDropdown()" class="flex items-center space-x-2 p-1.5 rounded-full hover:ring-2 hover:ring-indigo-500 transition-all focus:outline-none">
+            <img id="userAvatar" class="w-8 h-8 rounded-full border border-gray-300 dark:border-slate-700 object-cover" src="" alt="Avatar" />
+          </button>
 
-        <div class="action-row">
-          <button class="btn-action-large btn-cart-large" id="pageAddCartBtn">ADD TO CART</button>
-          <button class="btn-action-large btn-buy-large" id="pageBuyBtn">BUY NOW</button>
-        </div>
+          <!-- Dropdown Menu -->
+          <div id="profileDropdownMenu" class="hidden absolute right-0 mt-3 w-72 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-800 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+            
+            <!-- User Info Header -->
+            <div class="px-4 py-3 border-b border-gray-100 dark:border-slate-800">
+              <p id="userName" class="text-sm font-bold text-gray-900 dark:text-white truncate">User Name</p>
+              <p id="userEmail" class="text-xs text-gray-500 dark:text-gray-400 truncate">user@example.com</p>
+            </div>
 
-        <!-- Reviews Box -->
-        <div class="reviews-container">
-          <h3 style="font-family: var(--font-code);">REVIEWS &amp; RATINGS</h3>
-          
-          <div class="auth-error-msg" id="authError">⚠️ Please sign in with Google to leave a review.</div>
-          
-          <div class="star-rating" id="starRating">
-            <span data-star="1">★</span><span data-star="2">★</span><span data-star="3">★</span><span data-star="4">★</span><span data-star="5">★</span>
+            <!-- Menu Links -->
+            <div class="py-1 text-sm font-medium text-gray-700 dark:text-gray-200">
+              
+              <button onclick="openModal('ordersModal'); loadUserOrders(); toggleProfileDropdown();" class="w-full flex items-center px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
+                <span class="mr-3 text-lg">📦</span> My Orders & Receipts
+              </button>
+
+              <button onclick="openModal('trackModal'); toggleProfileDropdown();" class="w-full flex items-center px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
+                <span class="mr-3 text-lg">🚚</span> Track Shipment
+              </button>
+
+              <button onclick="openModal('supportModal'); toggleProfileDropdown();" class="w-full flex items-center px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
+                <span class="mr-3 text-lg">💬</span> Support & Contact
+              </button>
+
+              <button onclick="openModal('termsModal'); toggleProfileDropdown();" class="w-full flex items-center px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
+                <span class="mr-3 text-lg">📄</span> Terms & Shipping Policy
+              </button>
+
+              <!-- Theme Settings -->
+              <div class="px-4 py-2.5 border-t border-gray-100 dark:border-slate-800">
+                <div class="flex items-center justify-between text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                  <span>THEME PREFERENCE</span>
+                </div>
+                <div class="grid grid-cols-3 gap-1 bg-gray-100 dark:bg-slate-800 p-1 rounded-xl text-xs text-center">
+                  <button id="themeLightBtn" onclick="setTheme('light')" class="py-1 rounded-lg font-medium transition-all">Light</button>
+                  <button id="themeDarkBtn" onclick="setTheme('dark')" class="py-1 rounded-lg font-medium transition-all">Dark</button>
+                  <button id="themeAutoBtn" onclick="setTheme('auto')" class="py-1 rounded-lg font-medium transition-all">Auto</button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Sign Out -->
+            <div class="border-t border-gray-100 dark:border-slate-800 pt-1">
+              <button onclick="handleSignOut()" class="w-full flex items-center px-4 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors">
+                <span class="mr-3 text-lg">🚪</span> Sign Out
+              </button>
+            </div>
+
           </div>
-
-          <input type="text" class="review-input" id="reviewText" placeholder="Write your thoughts on this drop...">
-          <button class="btn-glow" id="submitReviewBtn" style="width: fit-content;">Post Review</button>
-
-          <div id="reviewList" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;"></div>
         </div>
+
       </div>
     </div>
-  </div>
+  </header>
 
-  <!-- RARITY POPUP MODAL -->
-  <div id="rarityModal" class="rarity-modal">
-    <div class="rarity-modal-content">
-      <h3 id="modalTitle">Item Rarity Status</h3>
-      <p id="modalMade">Total Units Made: 0</p>
-      <p id="modalFuture">Future Runs: None</p>
-      <p id="modalStatus" class="status-highlight"></p>
-      <button class="close-modal-btn" id="closeRarityBtn">CLOSE</button>
-    </div>
-  </div>
-
-  <!-- Slide-out Cart Drawer -->
-  <div class="cart-drawer" id="cartDrawer">
-    <div class="cart-header">
-      <h3 style="font-family: var(--font-code);">YOUR LAB CART</h3>
-      <button id="closeCartBtn" style="background:none; border:none; color:var(--muted); font-size:1.5rem; cursor:pointer;">&times;</button>
-    </div>
-    <div class="cart-items" id="cartItems"></div>
+  <!-- ================= HERO & CATALOG ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
     
-    <div class="coupon-box">
-      <input type="text" class="coupon-input" id="couponInput" placeholder="PROMO CODE">
-      <button class="btn-apply-coupon" id="applyCouponBtn">APPLY</button>
+    <!-- Hero Banner -->
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 mb-4 border border-indigo-200 dark:border-indigo-800">
+        ⚡ Hardware Drops & Custom Engineering
+      </div>
+      <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4">
+        Custom Handhelds, Tools & Drops
+      </h1>
+      <p class="text-lg text-gray-600 dark:text-gray-300">
+        Engineered in Bikaner. Small batches, verified hardware, direct-to-door delivery.
+      </p>
     </div>
 
-    <div class="cart-footer">
-      <div style="display:flex; justify-content:space-between; margin-bottom: 1rem; font-family: var(--font-code);">
-        <span>TOTAL:</span>
-        <span id="cartTotal" style="color: var(--accent-neon); font-weight: bold;">₹0</span>
+    <!-- Product Grid -->
+    <div id="drops" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      
+      <!-- Card Item 1 -->
+      <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-sm hover:shadow-xl transition-all">
+        <div>
+          <div class="w-full h-48 bg-gradient-to-br from-indigo-500/10 to-violet-500/10 rounded-2xl flex items-center justify-center text-5xl mb-6">
+            📟
+          </div>
+          <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Batch Drop #01</span>
+          <h3 class="text-xl font-bold mt-1 text-gray-900 dark:text-white">Custom Handheld Core Unit</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            Integrated custom carrier board, pre-flashed kernel, M.2 SSD storage support, and ergonomic enclosure.
+          </p>
+          <div class="mt-4 flex items-baseline space-x-2">
+            <span class="text-2xl font-black text-gray-900 dark:text-white">₹4,999</span>
+            <span class="text-xs text-gray-500">Free Express Shipping</span>
+          </div>
+        </div>
+
+        <button onclick="triggerCheckout('drop-01', 'Custom Handheld Core Unit', 4999)" class="mt-6 w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md hover:shadow-indigo-500/25 transition-all">
+          Buy Now
+        </button>
       </div>
-      <button class="checkout-btn" id="checkoutBtn">PROCEED TO CHECKOUT</button>
+
+    </div>
+
+  </main>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- 1. Orders Modal -->
+  <div id="ordersModal" class="fixed inset-0 z-50 hidden bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-3xl border border-gray-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Your Orders & Receipts</h3>
+        <button onclick="closeModal('ordersModal')" class="text-gray-400 hover:text-gray-600 dark:hover:text-white text-xl">✕</button>
+      </div>
+      <div id="ordersListContainer" class="p-6 overflow-y-auto space-y-4">
+        <p class="text-sm text-gray-500 text-center">Loading orders...</p>
+      </div>
     </div>
   </div>
 
-  <footer>
-    SYSTEM ACTIVE &bull; OMNIMADE 2026
-  </footer>
+  <!-- 2. Track Shipment Modal -->
+  <div id="trackModal" class="fixed inset-0 z-50 hidden bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl border border-gray-200 dark:border-slate-800 shadow-2xl p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Track Your Shipment</h3>
+        <button onclick="closeModal('trackModal')" class="text-gray-400 hover:text-gray-600 dark:hover:text-white text-xl">✕</button>
+      </div>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
+        Enter the AWB Tracking Number provided in your confirmation email or order receipt.
+      </p>
+      <div class="space-y-3">
+        <input id="trackingInput" type="text" placeholder="Enter AWB or Order Number" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        <button onclick="redirectToTracking()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm transition-all">
+          Open Live Tracker
+        </button>
+      </div>
+    </div>
+  </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithPopup, signInWithRedirect, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, where, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  <!-- 3. Support Modal -->
+  <div id="supportModal" class="fixed inset-0 z-50 hidden bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl border border-gray-200 dark:border-slate-800 shadow-2xl p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Support & Contact</h3>
+        <button onclick="closeModal('supportModal')" class="text-gray-400 hover:text-gray-600 dark:hover:text-white text-xl">✕</button>
+      </div>
+      <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
+        Have questions regarding batch drops, custom requests, or shipping status?
+      </p>
+      <div class="bg-gray-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 text-sm space-y-2">
+        <p><strong class="text-gray-900 dark:text-white">Email:</strong> gamerindian840@gmail.com</p>
+        <p><strong class="text-gray-900 dark:text-white">Origin:</strong> Bikaner, Rajasthan (Ram Rahim Street)</p>
+        <p><strong class="text-gray-900 dark:text-white">Hours:</strong> 2:00 PM – 10:00 PM IST</p>
+      </div>
+    </div>
+  </div>
 
+  <!-- 4. Terms & Policy Modal -->
+  <div id="termsModal" class="fixed inset-0 z-50 hidden bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl border border-gray-200 dark:border-slate-800 shadow-2xl p-6 max-h-[80vh] flex flex-col">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Terms & Shipping Policy</h3>
+        <button onclick="closeModal('termsModal')" class="text-gray-400 hover:text-gray-600 dark:hover:text-white text-xl">✕</button>
+      </div>
+      <div class="text-xs text-gray-600 dark:text-gray-300 space-y-3 overflow-y-auto pr-2 leading-relaxed">
+        <p><strong>1. Manufacturing & Quality:</strong> All hardware units and drops are hand-assembled and tested before packaging.</p>
+        <p><strong>2. Dispatch & Logistics:</strong> Orders are packaged and handed over to logistics partners (Delhivery / BlueDart / XpressBees via Shiprocket) within 24–48 hours.</p>
+        <p><strong>3. Delivery Timeline:</strong> Standard ground/air courier timelines apply (typically 3–5 business days depending on delivery location).</p>
+        <p><strong>4. Returns & Replacements:</strong> Defective components on arrival are covered by direct repair or replacement support upon inspection.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. About Omnimade Modal -->
+  <div id="aboutModal" class="fixed inset-0 z-50 hidden bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl border border-gray-200 dark:border-slate-800 shadow-2xl p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-white">About Omnimade Lab</h3>
+        <button onclick="closeModal('aboutModal')" class="text-gray-400 hover:text-gray-600 dark:hover:text-white text-xl">✕</button>
+      </div>
+      <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+        Omnimade is an independent hardware laboratory and design studio focused on building custom Linux handhelds, utility electronics, and unique physical drops.
+      </p>
+    </div>
+  </div>
+
+  <!-- ================= SCRIPTS & FIREBASE ================= -->
+  <script>
+    /* ----------------------------------------------------
+       1. FIREBASE INITIALIZATION
+       (Replace with your Firebase Project Configuration)
+    ----------------------------------------------------- */
     const firebaseConfig = {
-      apiKey: "AIzaSyCGF8vVav1M4FFWtZ0ADXsVvTl8hPqGuhM",
-      authDomain: "omnimade-6f515.firebaseapp.com",
-      projectId: "omnimade-6f515",
-      storageBucket: "omnimade-6f515.firebasestorage.app",
-      messagingSenderId: "93197356307",
-      appId: "1:93197356307:web:6cc2cd99135c778c9e5ee6"
+      apiKey: "YOUR_FIREBASE_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
     let currentUser = null;
-    let isUserAdmin = false;
-    let projects = [];
-    let selectedRating = 5;
-    let activeProductId = null;
-    let unsubscribeReviews = null;
-    let currentReviewsList = [];
-    let discountMultiplier = 0.0;
 
-    // --- Persistent Cart System (localStorage) ---
-    let cart = JSON.parse(localStorage.getItem('omnimade_cart')) || [];
-
-    function saveCart() {
-      localStorage.setItem('omnimade_cart', JSON.stringify(cart));
-      updateCartUI();
-    }
-
-    // --- RARITY POPUP MODAL HANDLER ---
-    window.showRarityDetails = function(e, title, rarity, madeCount, futurePlan) {
-      if (e) e.stopPropagation();
-      document.getElementById('modalTitle').innerText = `${title} [${(rarity || 'DROP').toUpperCase()}]`;
-      document.getElementById('modalMade').innerText = `Batch Produced: ${madeCount || 'Custom Run'} units`;
-      document.getElementById('modalFuture').innerText = `Future Production: ${futurePlan || 'On Demand'}`;
-      
-      const statusEl = document.getElementById('modalStatus');
-      const planStr = (futurePlan || '').toLowerCase();
-      if (planStr.includes('never') || planStr.includes('vaulted')) {
-        statusEl.innerText = "STATUS: VAULTED / NEVER PRODUCED AGAIN";
-        statusEl.style.color = "var(--danger)";
-      } else if (planStr.includes('active') || planStr.includes('continuous')) {
-        statusEl.innerText = "STATUS: ACTIVE RUN";
-        statusEl.style.color = "var(--accent-green)";
-      } else {
-        statusEl.innerText = "STATUS: LIMITED BATCH";
-        statusEl.style.color = "var(--accent-gold)";
-      }
-
-      document.getElementById('rarityModal').style.display = 'flex';
-    };
-
-    document.getElementById('closeRarityBtn').onclick = () => {
-      document.getElementById('rarityModal').style.display = 'none';
-    };
-
-    // Auth Handlers
-    document.getElementById('signInBtn').addEventListener('click', () => {
-      signInWithPopup(auth, provider).catch(() => signInWithRedirect(auth, provider));
-    });
-
-    document.getElementById('userAvatar').addEventListener('click', (e) => {
-      e.stopPropagation();
-      document.getElementById('userMenu').classList.toggle('active');
-    });
-
-    document.addEventListener('click', () => document.getElementById('userMenu').classList.remove('active'));
-
-    document.getElementById('signOutBtn').addEventListener('click', () => {
-      signOut(auth).then(() => {
-        document.getElementById('userMenu').classList.remove('active');
-        isUserAdmin = false;
-      });
-    });
-
-    onAuthStateChanged(auth, async (user) => {
+    /* ----------------------------------------------------
+       2. AUTH STATE LISTENER
+    ----------------------------------------------------- */
+    auth.onAuthStateChanged((user) => {
       currentUser = user;
+      const loginBtn = document.getElementById("loginBtn");
+      const profileContainer = document.getElementById("userProfileContainer");
+      const userAvatar = document.getElementById("userAvatar");
+      const userName = document.getElementById("userName");
+      const userEmail = document.getElementById("userEmail");
+
       if (user) {
-        document.getElementById('signInBtn').style.display = 'none';
-        document.getElementById('profileContainer').style.display = 'block';
-        document.getElementById('userAvatar').src = user.photoURL || 'https://lh3.googleusercontent.com/a/default-user';
-        document.getElementById('userName').innerText = user.displayName || 'Subscriber';
-        document.getElementById('userEmail').innerText = user.email || '';
-        document.getElementById('authError').style.display = 'none';
+        loginBtn.classList.add("hidden");
+        profileContainer.classList.remove("hidden");
+        userAvatar.src = user.photoURL || "https://api.dicebear.com/7.x/identicon/svg?seed=" + user.uid;
+        userName.textContent = user.displayName || "Omnimade Member";
+        userEmail.textContent = user.email;
+      } else {
+        loginBtn.classList.remove("hidden");
+        profileContainer.classList.add("hidden");
+      }
+    });
 
-        try {
-          const adminDoc = await getDoc(doc(db, "admins", user.email));
-          isUserAdmin = adminDoc.exists();
-        } catch (e) {
-          isUserAdmin = false;
+    function handleGoogleSignIn() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch((error) => {
+        console.error("Sign in failed:", error);
+      });
+    }
+
+    function handleSignOut() {
+      auth.signOut().then(() => {
+        toggleProfileDropdown();
+      });
+    }
+
+    /* ----------------------------------------------------
+       3. THEME CONTROLLER (LIGHT / DARK / AUTO)
+    ----------------------------------------------------- */
+    function setTheme(preference) {
+      localStorage.setItem('omnimade-theme', preference);
+      applyTheme(preference);
+    }
+
+    function applyTheme(preference) {
+      const html = document.documentElement;
+      const lightBtn = document.getElementById("themeLightBtn");
+      const darkBtn = document.getElementById("themeDarkBtn");
+      const autoBtn = document.getElementById("themeAutoBtn");
+
+      // Reset button styles
+      [lightBtn, darkBtn, autoBtn].forEach(b => {
+        if(b) b.className = "py-1 rounded-lg font-medium transition-all text-gray-500 hover:text-gray-900 dark:hover:text-white";
+      });
+
+      if (preference === 'dark') {
+        html.classList.add('dark');
+        if(darkBtn) darkBtn.className = "py-1 rounded-lg font-medium bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm";
+      } else if (preference === 'light') {
+        html.classList.remove('dark');
+        if(lightBtn) lightBtn.className = "py-1 rounded-lg font-medium bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm";
+      } else {
+        // Auto / System
+        if(autoBtn) autoBtn.className = "py-1 rounded-lg font-medium bg-white dark:bg-slate-700 text-gray-900 dark:text-white shadow-sm";
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          html.classList.add('dark');
+        } else {
+          html.classList.remove('dark');
         }
-
-      } else {
-        document.getElementById('signInBtn').style.display = 'block';
-        document.getElementById('profileContainer').style.display = 'none';
-        isUserAdmin = false;
-      }
-
-      if (activeProductId) renderReviewsList(currentReviewsList);
-    });
-
-    // Catalog Loader
-    async function initCatalog() {
-      try {
-        const res = await fetch('./projects.json');
-        projects = await res.json();
-        renderGrid(projects);
-        updateCartUI();
-      } catch (err) {
-        console.error("JSON Error:", err);
       }
     }
 
-    function renderGrid(items) {
-      document.getElementById('grid').innerHTML = items.map(item => {
-        const rarity = item.rarity || 'common';
-        const rarityLabel = item.rarityLabel || rarity.toUpperCase();
-        const madeCount = item.madeCount || '50';
-        const futurePlan = item.futurePlan || 'Limited Runs';
+    // Initialize Theme on Load
+    const savedTheme = localStorage.getItem('omnimade-theme') || 'auto';
+    applyTheme(savedTheme);
 
-        return `
-        <div class="card">
-          <div class="card-thumb-wrap" onclick="openProductPage('${item.id}')">
-            <img src="${item.image}" class="card-thumb" alt="${item.title}">
-          </div>
-          <div class="card-body">
-            <div class="card-meta-row">
-              <span class="tag">${item.badge || 'DROP'}</span>
-              <span class="rarity-badge rarity-${rarity}" onclick="showRarityDetails(event, '${item.title.replace(/'/g, "\\'")}', '${rarity}', '${madeCount}', '${futurePlan}')">
-                ${rarityLabel}
-              </span>
-            </div>
-            <h3 class="card-title" onclick="openProductPage('${item.id}')">${item.title}</h3>
-            <p class="card-desc">${item.description}</p>
-            <div style="font-family: var(--font-code); font-weight:700; font-size:1.1rem; margin-bottom: 0.5rem; color: var(--accent-neon);">${item.price}</div>
-            <div class="card-actions-group">
-              <button class="btn-cart" onclick="addToCart('${item.id}')">ADD TO CART</button>
-              <button class="btn-buy" onclick="buyNow('${item.id}')">BUY NOW</button>
-            </div>
-          </div>
-        </div>
-      `}).join('');
-    }
-
-    // Navigation Switches & Gallery View
-    window.openProductPage = function(id) {
-      const item = projects.find(p => p.id === id);
-      if (!item) return;
-      activeProductId = id;
-
-      document.getElementById('pageImg').src = item.image;
-      document.getElementById('pageTitle').innerText = item.title;
-      document.getElementById('pagePrice').innerText = item.price;
-      document.getElementById('pageBadge').innerText = item.badge || 'DROP';
-      document.getElementById('pageDesc').innerText = item.fullDescription || item.description;
-
-      const rarity = item.rarity || 'common';
-      const rBadge = document.getElementById('pageRarityBadge');
-      rBadge.className = `rarity-badge rarity-${rarity}`;
-      rBadge.innerText = item.rarityLabel || rarity.toUpperCase();
-      rBadge.onclick = (e) => showRarityDetails(e, item.title, rarity, item.madeCount || '50', item.futurePlan || 'Limited Runs');
-
-      const thumbsContainer = document.getElementById('galleryThumbs');
-      const galleryList = (item.gallery && item.gallery.length > 0) ? item.gallery : [item.image];
-
-      thumbsContainer.innerHTML = galleryList.map((imgUrl, idx) => `
-        <button class="thumb-btn ${idx === 0 ? 'active' : ''}" onclick="switchMainImage('${imgUrl}', this)">
-          <img src="${imgUrl}" alt="Angle ${idx + 1}">
-        </button>
-      `).join('');
-
-      document.getElementById('pageAddCartBtn').onclick = () => addToCart(id);
-      document.getElementById('pageBuyBtn').onclick = () => buyNow(id);
-
-      listenToReviews(id);
-
-      document.getElementById('shopView').style.display = 'none';
-      document.getElementById('productPageView').style.display = 'block';
-      window.scrollTo(0, 0);
-    };
-
-    window.switchMainImage = function(imgUrl, btnElement) {
-      document.getElementById('pageImg').src = imgUrl;
-      document.querySelectorAll('.thumb-btn').forEach(b => b.classList.remove('active'));
-      btnElement.classList.add('active');
-    };
-
-    function showShopView() {
-      document.getElementById('productPageView').style.display = 'none';
-      document.getElementById('shopView').style.display = 'block';
-      window.scrollTo(0, 0);
-    }
-
-    // Direct Homepage / Back Button handlers
-    document.getElementById('backToShopBtn').addEventListener('click', showShopView);
-    document.getElementById('navHomeLink').addEventListener('click', showShopView);
-
-    // Buy & Cart Operations
-    window.buyNow = function(id) {
-      const item = projects.find(p => p.id === id);
-      if (!item) return;
-
-      if (item.razorpayUrl) {
-        window.open(item.razorpayUrl, '_blank');
-      } else {
-        const itemPrice = item.priceNumeric || parseInt((item.price || '').replace(/[^0-9]/g, '')) || 1;
-        triggerRazorpayPayment(itemPrice, `Direct Order: ${item.title}`);
-      }
-    };
-
-    window.addToCart = function(id) {
-      const item = projects.find(p => p.id === id);
-      if (item) {
-        cart.push(item);
-        saveCart();
-        document.getElementById('cartDrawer').classList.add('active');
-      }
-    };
-
-    function updateCartUI() {
-      document.getElementById('cartBadge').innerText = cart.length;
-      
-      const cartContainer = document.getElementById('cartItems');
-      if (cart.length === 0) {
-        cartContainer.innerHTML = '<div style="color:var(--muted); font-size:0.85rem; text-align:center; padding: 2rem 0;">Your cart is empty.</div>';
-      } else {
-        cartContainer.innerHTML = cart.map((item, idx) => `
-          <div class="cart-item">
-            <div>
-              <div style="font-weight:bold; font-size:0.85rem;">${item.title}</div>
-              <div style="color:var(--accent-neon); font-size:0.8rem;">${item.price}</div>
-            </div>
-            <button onclick="removeFromCart(${idx})" style="background:none; border:none; color:var(--danger); cursor:pointer;">✕</button>
-          </div>
-        `).join('');
-      }
-
-      const rawTotal = cart.reduce((sum, item) => sum + (item.priceNumeric || parseInt((item.price || '').replace(/[^0-9]/g, '')) || 0), 0);
-      const discountedTotal = Math.max(0, Math.round(rawTotal - (rawTotal * discountMultiplier)));
-      document.getElementById('cartTotal').innerText = `₹${discountedTotal.toLocaleString('en-IN')}`;
-    }
-
-    window.removeFromCart = function(idx) {
-      cart.splice(idx, 1);
-      saveCart();
-    };
-
-    // Promo Code Application
-    document.getElementById('applyCouponBtn').addEventListener('click', () => {
-      const code = document.getElementById('couponInput').value.trim().toUpperCase();
-      if (code === 'AUGUST20') {
-        discountMultiplier = 0.20;
-        alert('Promo code AUGUST20 applied: 20% OFF!');
-        updateCartUI();
-      } else if (!code) {
-        alert('Please enter a promo code.');
-      } else {
-        alert('Invalid Promo Code');
+    // Watch OS system preference changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      if (localStorage.getItem('omnimade-theme') === 'auto' || !localStorage.getItem('omnimade-theme')) {
+        applyTheme('auto');
       }
     });
 
-    // Dynamic Razorpay Checkout Function
-    function triggerRazorpayPayment(amountInRupees, orderDescription) {
+    /* ----------------------------------------------------
+       4. MODAL & UI CONTROLLERS
+    ----------------------------------------------------- */
+    function toggleProfileDropdown() {
+      const menu = document.getElementById("profileDropdownMenu");
+      menu.classList.toggle("hidden");
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.remove("hidden");
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add("hidden");
+    }
+
+    function redirectToTracking() {
+      const val = document.getElementById("trackingInput").value.trim();
+      if (!val) return alert("Please enter an AWB tracking code.");
+      window.open(`https://shiprocket.co/tracking/${val}`, '_blank');
+    }
+
+    /* ----------------------------------------------------
+       5. RAZORPAY CHECKOUT & FIRESTORE LOGGING
+    ----------------------------------------------------- */
+    function triggerCheckout(productId, productName, amountInINR) {
+      if (!currentUser) {
+        alert("Please Sign In first to proceed with your order.");
+        handleGoogleSignIn();
+        return;
+      }
+
       const options = {
-        "key": "rzp_live_TPyrohl5D0MqoZ",
-        "amount": Math.round(amountInRupees * 100), // Converted to paise
-        "currency": "INR",
-        "name": "OMNIMADE",
-        "description": orderDescription,
-        "handler": function (response) {
-          alert("Payment Successful! Order Reference: " + response.razorpay_payment_id);
-          cart = [];
-          saveCart();
-          document.getElementById('cartDrawer').classList.remove('active');
+        key: "YOUR_RAZORPAY_KEY_ID", // Enter your Razorpay Key ID
+        amount: amountInINR * 100, // Amount in paise
+        currency: "INR",
+        name: "OMNIMADE",
+        description: productName,
+        image: "https://omnimade.shop/omnimade-logo.png",
+        handler: function (response) {
+          // Record successful payment to Firestore
+          recordOrderInFirestore(productId, productName, amountInINR, response.razorpay_payment_id);
         },
-        "prefill": {
-          "name": currentUser ? currentUser.displayName : "",
-          "email": currentUser ? currentUser.email : "",
-          "contact": ""
+        prefill: {
+          name: currentUser.displayName || "",
+          email: currentUser.email || ""
         },
-        "theme": {
-          "color": "#3b82f6"
+        theme: {
+          color: "#4f46e5"
         }
       };
 
@@ -870,113 +424,70 @@
       rzp.open();
     }
 
-    // Checkout Button Handler
-    document.getElementById('checkoutBtn').onclick = () => {
-      if (cart.length === 0) return alert('Your cart is empty!');
-
-      const rawTotal = cart.reduce((sum, item) => sum + (item.priceNumeric || parseInt((item.price || '').replace(/[^0-9]/g, '')) || 0), 0);
-      const finalAmount = Math.max(1, Math.round(rawTotal - (rawTotal * discountMultiplier)));
-
-      triggerRazorpayPayment(finalAmount, `Order of ${cart.length} item(s) from Lab Cart`);
-    };
-
-    // Firestore Live Reviews Listener
-    function listenToReviews(productId) {
-      if (unsubscribeReviews) unsubscribeReviews();
-
-      const q = query(collection(db, "reviews"), where("productId", "==", productId));
-      
-      unsubscribeReviews = onSnapshot(q, (snapshot) => {
-        currentReviewsList = [];
-        snapshot.forEach((docSnap) => {
-          currentReviewsList.push({ id: docSnap.id, ...docSnap.data() });
+    async function recordOrderInFirestore(productId, productName, amount, paymentId) {
+      try {
+        const orderRef = await db.collection("orders").add({
+          userId: currentUser.uid,
+          customerName: currentUser.displayName || "Customer",
+          customerEmail: currentUser.email,
+          productId: productId,
+          productName: productName,
+          amountPaid: amount,
+          paymentId: paymentId,
+          orderStatus: "Processing / Synced with Shiprocket",
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          estimatedDeliveryDays: 4
         });
-        renderReviewsList(currentReviewsList);
-      });
+
+        alert("🎉 Order confirmed! Your receipt ID is #" + orderRef.id.slice(0, 8).toUpperCase() + ". We'll email your live Shiprocket tracking number once packed.");
+      } catch (err) {
+        console.error("Error logging order:", err);
+      }
     }
 
-    // Star Selection UI
-    document.querySelectorAll('#starRating span').forEach(star => {
-      star.addEventListener('click', (e) => {
-        selectedRating = parseInt(e.target.getAttribute('data-star'));
-        document.querySelectorAll('#starRating span').forEach((s, idx) => {
-          s.style.color = idx < selectedRating ? '#eab308' : '#374151';
-        });
-      });
-    });
-
-    // Write Review
-    document.getElementById('submitReviewBtn').addEventListener('click', async () => {
+    /* ----------------------------------------------------
+       6. LOAD USER ORDERS
+    ----------------------------------------------------- */
+    async function loadUserOrders() {
+      const container = document.getElementById("ordersListContainer");
       if (!currentUser) {
-        document.getElementById('authError').style.display = 'block';
+        container.innerHTML = `<p class="text-sm text-gray-500 text-center">Please sign in to view your orders.</p>`;
         return;
       }
-      
-      const txt = document.getElementById('reviewText').value.trim();
-      if (!txt) return;
 
       try {
-        await addDoc(collection(db, "reviews"), {
-          productId: activeProductId,
-          userId: currentUser.uid,
-          author: currentUser.displayName ? currentUser.displayName.split(' ')[0] : 'Member',
-          rating: selectedRating,
-          text: txt,
-          createdAt: new Date().toISOString()
-        });
+        const snapshot = await db.collection("orders")
+          .where("userId", "==", currentUser.uid)
+          .get();
 
-        document.getElementById('reviewText').value = '';
-      } catch (err) {
-        console.error("Error saving review:", err);
-      }
-    });
-
-    // Render Reviews
-    function renderReviewsList(list) {
-      document.getElementById('reviewList').innerHTML = list.map(r => {
-        const isAuthor = currentUser && currentUser.uid === r.userId;
-        const canDelete = isAuthor || isUserAdmin;
-
-        return `
-          <div style="background:#080c14; border:1px solid var(--card-border); padding:0.75rem; border-radius:8px; font-size:0.85rem; display:flex; justify-content:space-between; align-items:flex-start;">
-            <div style="flex-grow:1;">
-              <div style="color:var(--accent-neon); font-weight:bold; font-family:var(--font-code);">${r.author} (${'★'.repeat(r.rating)}) ${isAuthor ? '<span style="color:var(--muted); font-size:0.7rem;">(You)</span>' : ''}</div>
-              <div style="color:var(--muted); margin-top:0.25rem;">${r.text}</div>
-            </div>
-            ${canDelete ? `<button onclick="deleteReview('${r.id}')" style="background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); color:#f87171; border-radius:4px; padding:0.2rem 0.5rem; cursor:pointer; font-size:0.75rem; font-family:var(--font-code);">DELETE</button>` : ''}
-          </div>
-        `;
-      }).join('') || '<span style="color:var(--muted); font-size:0.85rem;">No reviews yet. Be the first to drop feedback!</span>';
-    }
-
-    // Delete Review Function
-    window.deleteReview = async function(reviewId) {
-      if (confirm("Are you sure you want to delete this review?")) {
-        try {
-          await deleteDoc(doc(db, "reviews", reviewId));
-        } catch (err) {
-          console.error("Permission denied or error deleting review:", err);
-          alert("Error: You do not have permission to delete this review.");
+        if (snapshot.empty) {
+          container.innerHTML = `<p class="text-sm text-gray-500 text-center">You haven't placed any orders yet.</p>`;
+          return;
         }
+
+        let html = '';
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          html += `
+            <div class="p-4 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/40 flex justify-between items-center">
+              <div>
+                <span class="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">#${doc.id.slice(0, 8).toUpperCase()}</span>
+                <h4 class="text-sm font-bold text-gray-900 dark:text-white mt-0.5">${data.productName}</h4>
+                <p class="text-xs text-gray-500 mt-1">Status: <span class="text-amber-500 font-semibold">${data.orderStatus}</span></p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm font-black text-gray-900 dark:text-white">₹${data.amountPaid}</p>
+                <p class="text-[10px] text-gray-400 mt-0.5">Est. 3-4 Days</p>
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      } catch (err) {
+        container.innerHTML = `<p class="text-sm text-rose-500 text-center">Unable to load orders.</p>`;
       }
-    };
-
-    // Cart Drawer Open/Close
-    document.getElementById('openCartBtn').onclick = () => document.getElementById('cartDrawer').classList.add('active');
-    document.getElementById('closeCartBtn').onclick = () => document.getElementById('cartDrawer').classList.remove('active');
-
-    // Category Filter Controls
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-        const f = e.target.getAttribute('data-filter');
-        if (f === 'all') renderGrid(projects);
-        else renderGrid(projects.filter(p => p.category === f));
-      });
-    });
-
-    document.addEventListener('DOMContentLoaded', initCatalog);
+    }
   </script>
+
 </body>
 </html>
