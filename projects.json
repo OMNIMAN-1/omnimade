@@ -6,27 +6,72 @@
     "badge": "HARDWARE DROP",
     "price": "₹3,499",
     "priceNumeric": 3499,
-    "image": "assets/bose.png",
-    "description": "Engineered acoustic drivers with ambient noise isolation.",
-    "fullDescription": "Custom tuned acoustic architecture built for long development sessions with ergonomic isolation.",
+    "image": "BOSE HEADPHONES.jpg",
+    "gallery": [
+      "BOSE HEADPHONES.jpg",
+      "BOSE HEADPHONES 2.jpg",
+      "BOSE HEADPHONES 3.jpg",
+      "BOSE HEADPHONES 4.jpg"
+    ],
+    "description": "Engineered acoustic drivers with ambient noise isolation and multi-angle folding chassis.",
+    "fullDescription": "Custom tuned acoustic architecture built for long studio and development sessions. Features ergonomic soft earcups, active isolation, and a foldable compact design with carrying travel case.",
     "rarity": "uncommon",
     "rarityLabel": "Uncommon",
     "madeCount": "150",
     "futurePlan": "Active Batch Production"
   },
   {
-    "id": "portronics-mouse",
+    "id": "portronics-toad-one",
     "title": "Portronics Toad One Mouse",
     "category": "craft",
     "badge": "HARDWARE DROP",
     "price": "₹499",
     "priceNumeric": 499,
-    "image": "assets/mouse.png",
-    "description": "Ergonomic multi-mode wireless clicker for desktop setups.",
-    "fullDescription": "Optical precision sensor with dual-mode connectivity.",
+    "image": "PORTRONICS TOAD ONE.jpg",
+    "gallery": [
+      "PORTRONICS TOAD ONE.jpg"
+    ],
+    "description": "Ergonomic multi-mode wireless clicker with optical precision tracking.",
+    "fullDescription": "High-efficiency wireless mouse built for workflow productivity and desk setups with quiet switches and fast tracking response.",
     "rarity": "common",
     "rarityLabel": "Common",
-    "madeCount": "500",
+    "madeCount": "67",
     "futurePlan": "Continuous Run"
+  },
+  {
+    "id": "prada-water-bottle",
+    "title": "Prada Clear Water Bottle",
+    "category": "craft",
+    "badge": "LAB DROP",
+    "price": "₹899",
+    "priceNumeric": 899,
+    "image": "PRADA CLEAR WATER BOTTLE.jpg",
+    "gallery": [
+      "PRADA CLEAR WATER BOTTLE.jpg"
+    ],
+    "description": "Clear studio hydration vessel with sealed ribbed cap and stealth profile.",
+    "fullDescription": "Durable, high-grade transparent studio bottle designed for desk setups and active lab sessions.",
+    "rarity": "legendary",
+    "rarityLabel": "Legendary",
+    "madeCount": "25",
+    "futurePlan": "Never to be made again (Vaulted)"
+  },
+  {
+    "id": "stanley-5m-tape",
+    "title": "Stanley 5m Measuring Tape",
+    "category": "craft",
+    "badge": "HARDWARE DROP",
+    "price": "₹449",
+    "priceNumeric": 449,
+    "image": "STANLEY 5M.jpg",
+    "gallery": [
+      "STANLEY 5M.jpg"
+    ],
+    "description": "High-impact polymer casing with smooth lock mechanism and clear rule markings.",
+    "fullDescription": "Essential precision measurement tool for workbench planning, 3D modeling alignment, and physical fabrication setups.",
+    "rarity": "rare",
+    "rarityLabel": "Rare Drop",
+    "madeCount": "75",
+    "futurePlan": "Limited Runs Every Quarter"
   }
 ]
