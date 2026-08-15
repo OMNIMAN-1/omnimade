@@ -77,9 +77,7 @@
     "rarityLabel": "Rare Drop",
     "madeCount": "75",
     "futurePlan": "Limited Runs Every Quarter"
-  }
-]
-
+  },
   {
     "id": "vaulted-core-01",
     "title": "Omni Core Handheld [1 of 1 Public Unit]",
@@ -100,3 +98,4 @@
     "madeCount": "2 (1 Archive / 1 Public)",
     "futurePlan": "Never to be made again (Permanent Vault)"
   }
+]
