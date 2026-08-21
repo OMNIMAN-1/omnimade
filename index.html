@@ -111,23 +111,6 @@
 
     .nav-actions { display: flex; gap: 0.75rem; align-items: center; }
 
-    .nav-btn {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--card-border);
-      color: var(--text);
-      padding: 0.5rem 0.85rem;
-      border-radius: 6px;
-      font-family: var(--font-code);
-      font-size: 0.8rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-    .nav-btn:hover { border-color: var(--accent); color: var(--accent-neon); }
-
     .cart-btn {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--card-border);
@@ -179,7 +162,7 @@
 
     .user-menu {
       position: absolute; right: 0; top: calc(100% + 0.75rem);
-      width: 270px; background: #0d1117; border: 1px solid var(--card-border);
+      width: 275px; background: #0d1117; border: 1px solid var(--card-border);
       border-radius: 12px; padding: 1rem; display: none; flex-direction: column; gap: 0.5rem;
       z-index: 600; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
     }
@@ -226,10 +209,11 @@
 
     .section-container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
     .controls { display: flex; justify-content: space-between; margin-bottom: 2rem; border-bottom: 1px solid var(--card-border); padding-bottom: 1rem; }
-    .filters { display: flex; gap: 0.5rem; }
+    .filters { display: flex; gap: 0.5rem; flex-wrap: wrap; }
     .filter-btn {
       background: transparent; border: 1px solid transparent; color: var(--muted);
       padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; font-family: var(--font-code); cursor: pointer;
+      transition: all 0.2s ease;
     }
     .filter-btn.active, .filter-btn:hover { background: var(--card-bg); border-color: var(--card-border); color: var(--text); }
 
@@ -682,10 +666,6 @@
       .nav-actions {
         gap: 0.4rem;
       }
-      .nav-btn {
-        padding: 0.4rem 0.55rem;
-        font-size: 0.72rem;
-      }
       .cart-btn {
         padding: 0.4rem 0.65rem;
         font-size: 0.75rem;
@@ -723,11 +703,6 @@
     </a>
     
     <div class="nav-actions">
-      <!-- Direct Authenticity / Provenance Verification Terminal Trigger -->
-      <button class="nav-btn" id="openVerifyBtn">
-        <span>🛡️</span> VERIFY ID
-      </button>
-
       <button class="cart-btn" id="openCartBtn">
         🛒 CART <span class="cart-count" id="cartBadge">0</span>
       </button>
@@ -740,6 +715,11 @@
           <span class="user-name" id="userName">User Name</span>
           <span class="user-email" id="userEmail">user@gmail.com</span>
           
+          <!-- Moved Verify ID here inside profile dropdown -->
+          <button class="menu-item-btn" id="openVerifyBtn">
+            <span>🛡️</span> Verify ID &amp; Provenance
+          </button>
+
           <button class="menu-item-btn" id="openCodeVaultBtn">
             <span>🔐</span> My Digital Code Locker
           </button>
@@ -866,6 +846,17 @@
 
       <!-- Right Bidding Terminal -->
       <div style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:1.75rem; display:flex; flex-direction:column; gap:1.25rem;">
+        
+        <!-- Admin Auction Control Panel (Only appears when Admin is signed in) -->
+        <div id="adminAuctionBar" style="display:none; background:rgba(212,175,55,0.1); border:1px solid #d4af37; border-radius:8px; padding:0.75rem; font-family:var(--font-code); font-size:0.75rem;">
+          <div style="font-weight:800; color:#d4af37; margin-bottom:0.4rem;">⚡ ADMIN AUCTION CONDUCTOR</div>
+          <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+            <button class="btn-glow" style="padding:0.3rem 0.6rem; font-size:0.7rem; background:#22c55e; color:#000;" onclick="adminStartAuction()">START AUCTION</button>
+            <button class="btn-glow" style="padding:0.3rem 0.6rem; font-size:0.7rem; background:#eab308; color:#000;" onclick="adminAddAuctionTime(120)">+2 MINS</button>
+            <button class="btn-glow" style="padding:0.3rem 0.6rem; font-size:0.7rem; background:#ef4444; color:#fff;" onclick="adminEndAuction()">END &amp; CALL WINNER</button>
+          </div>
+        </div>
+
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--card-border); padding-bottom:1rem;">
           <span class="tag" style="background:rgba(239,68,68,0.15); color:#ef4444; border-color:#ef4444;" id="auctionLiveBadge">🔴 LIVE VAULT AUCTION</span>
           <div style="font-family:var(--font-code); font-size:0.85rem; color:var(--accent-neon);">
@@ -912,7 +903,7 @@
 
       <div style="display:flex; flex-direction:column; gap:0.75rem;">
         <div>
-          <label style="font-family:var(--font-code); font-size:0.7rem; color:var(--muted); text-transform:uppercase;">Chassis Serial / IMEI Number</label>
+          <label style="font-family:var(--font-code); font-size:0.7rem; color:var(--muted); text-transform:uppercase;">Chassis Serial / Stamp Number</label>
           <input type="text" id="verifySerialInput" class="review-input" placeholder="e.g. OMNI-VLT-02" style="margin-top:0.25rem; text-transform:uppercase;">
         </div>
 
@@ -1062,6 +1053,7 @@
     let currentAuctionUnsub = null;
     let currentBidsUnsub = null;
     let activeAuctionData = null;
+    let timerInterval = null;
 
     // --- Strict Inventory-Bound Cart State ---
     let cart = JSON.parse(localStorage.getItem('omnimade_cart_map')) || {};
@@ -1381,6 +1373,7 @@
 
     // --- PROVENANCE & AUTHENTICITY VERIFICATION TERMINAL ---
     document.getElementById('openVerifyBtn').onclick = () => {
+      document.getElementById('userMenu').classList.remove('active');
       document.getElementById('verifyModal').style.display = 'flex';
       document.getElementById('verifyResultArea').innerHTML = '';
       document.getElementById('verifySerialInput').value = '';
@@ -1553,6 +1546,7 @@
       signOut(auth).then(() => {
         document.getElementById('userMenu').classList.remove('active');
         isUserAdmin = false;
+        document.getElementById('adminAuctionBar').style.display = 'none';
       });
     });
 
@@ -1568,15 +1562,18 @@
 
         try {
           const adminDoc = await getDoc(doc(db, "admins", user.email));
-          isUserAdmin = adminDoc.exists();
+          isUserAdmin = adminDoc.exists() || user.email === "gamerindian840@gmail.com";
         } catch (e) {
-          isUserAdmin = false;
+          isUserAdmin = (user.email === "gamerindian840@gmail.com");
         }
       } else {
         document.getElementById('signInBtn').style.display = 'block';
         document.getElementById('profileContainer').style.display = 'none';
         isUserAdmin = false;
       }
+
+      const adminBar = document.getElementById('adminAuctionBar');
+      if (adminBar) adminBar.style.display = isUserAdmin ? 'block' : 'none';
 
       if (activeProductId) renderReviewsList(currentReviewsList);
       if (activeAuctionData) renderBidActionBox(activeAuctionData);
@@ -1626,6 +1623,7 @@
     function listenToLiveAuction(auctionId) {
       if (currentAuctionUnsub) currentAuctionUnsub();
       if (currentBidsUnsub) currentBidsUnsub();
+      if (timerInterval) clearInterval(timerInterval);
 
       const auctionRef = doc(db, "auctions", auctionId);
       
@@ -1640,6 +1638,7 @@
             minBidIncrement: 500,
             status: "live",
             image: "./Assets/VAULTED_UNIT.jpg",
+            endsAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
             description: "Ultra-complex handcrafted build. Unit 02/02. Housed in a custom carved wooden presentation case with wax-sealed metal authentication dossier."
           };
           activeAuctionData = fallbackAuction;
@@ -1671,6 +1670,31 @@
       document.getElementById('highestBidderName').innerText = data.highestBidderName 
         ? `Highest Bidder: ${data.highestBidderName}` 
         : "Starting Reserve: Available";
+
+      const adminBar = document.getElementById('adminAuctionBar');
+      if (adminBar) adminBar.style.display = isUserAdmin ? 'block' : 'none';
+
+      // Start live countdown timer
+      if (timerInterval) clearInterval(timerInterval);
+      const timerEl = document.getElementById('auctionTimer');
+
+      timerInterval = setInterval(() => {
+        if (!data.endsAt || data.status === 'ended') {
+          timerEl.innerText = "CONCLUDED";
+          return;
+        }
+
+        const diff = new Date(data.endsAt).getTime() - Date.now();
+        if (diff <= 0) {
+          timerEl.innerText = "00:00:00";
+          clearInterval(timerInterval);
+        } else {
+          const hours = Math.floor(diff / (1000 * 60 * 60));
+          const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const secs = Math.floor((diff % (1000 * 60)) / 1000);
+          timerEl.innerText = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+      }, 1000);
 
       renderBidActionBox(data);
     }
@@ -1736,6 +1760,48 @@
         </div>
       `;
     }
+
+    // --- ADMIN AUCTION CONTROLS ---
+    window.adminStartAuction = async function() {
+      if (!isUserAdmin || !activeAuctionData) return;
+      try {
+        const auctionRef = doc(db, "auctions", activeAuctionData.id);
+        await updateDoc(auctionRef, {
+          status: "live",
+          endsAt: new Date(Date.now() + 60 * 60 * 1000).toISOString()
+        });
+        alert("Auction started! Countdown set to 1 hour.");
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    window.adminAddAuctionTime = async function(secondsToAdd) {
+      if (!isUserAdmin || !activeAuctionData) return;
+      try {
+        const auctionRef = doc(db, "auctions", activeAuctionData.id);
+        const currentEnd = new Date(activeAuctionData.endsAt || Date.now()).getTime();
+        const newEnd = new Date(currentEnd + secondsToAdd * 1000).toISOString();
+        await updateDoc(auctionRef, { endsAt: newEnd });
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    window.adminEndAuction = async function() {
+      if (!isUserAdmin || !activeAuctionData) return;
+      if (confirm(`Conclude auction now and award to ${activeAuctionData.highestBidderName || 'highest bidder'}?`)) {
+        try {
+          const auctionRef = doc(db, "auctions", activeAuctionData.id);
+          await updateDoc(auctionRef, {
+            status: "ended",
+            endsAt: new Date().toISOString()
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
 
     window.placeQuickBid = async function(newAmount) {
       if (!currentUser || !activeAuctionData) return;
@@ -1803,7 +1869,7 @@
 
     window.buyNow = function(productId) {
       const item = projects.find(p => p.id === productId);
-      if (item && item.isAuction) {
+      if (item && (item.isAuction || item.rarity === 'vaulted' || item.category === 'auction')) {
         return openAuctionRoom(item.id);
       }
 
@@ -1823,7 +1889,7 @@
 
     window.addToCart = function(productId) {
       const item = projects.find(p => p.id === productId);
-      if (item && item.isAuction) {
+      if (item && (item.isAuction || item.rarity === 'vaulted' || item.category === 'auction')) {
         return openAuctionRoom(item.id);
       }
 
@@ -1994,7 +2060,7 @@
         const stockLeft = typeof liveStockMap[item.id] === 'number' ? liveStockMap[item.id] : (item.stock ?? 50);
         const isOutOfStock = stockLeft <= 0;
         const isLowStock = stockLeft > 0 && stockLeft < 10;
-        const isAuction = item.isAuction || item.rarity === 'vaulted';
+        const isAuction = item.isAuction || item.rarity === 'vaulted' || item.category === 'auction';
 
         let stockNotice = '';
         if (isAuction) {
@@ -2376,7 +2442,11 @@
         if (f === 'all') {
           renderGrid(projects);
         } else if (f === 'auction') {
-          renderGrid(projects.filter(p => p.isAuction || p.rarity === 'vaulted'));
+          // Exclusively show Auction / Vaulted drops
+          renderGrid(projects.filter(p => p.isAuction || p.rarity === 'vaulted' || p.category === 'auction'));
+        } else if (f === 'craft') {
+          // Hardware Drops ONLY (Excludes vaulted / auction items)
+          renderGrid(projects.filter(p => p.category === 'craft' && !p.isAuction && p.rarity !== 'vaulted'));
         } else {
           renderGrid(projects.filter(p => p.category === f));
         }
