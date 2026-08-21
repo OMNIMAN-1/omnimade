@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- O//M Circular Monogram Favicon -->
+  <!-- Googlebot-friendly Favicon Metadata -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 4C9.37 4 4 9.37 4 16C4 22.63 9.37 28 16 28C22.63 28 28 22.63 28 16' fill='none' stroke='%233b82f6' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M11 20V12L16 16.5L21 12V20' fill='none' stroke='%2300f0ff' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>OMNIMADE | Hardware &amp; Automation Lab</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -715,7 +718,7 @@
           <span class="user-name" id="userName">User Name</span>
           <span class="user-email" id="userEmail">user@gmail.com</span>
           
-          <!-- Moved Verify ID here inside profile dropdown -->
+          <!-- Moved Verify ID & Provenance inside Profile Menu -->
           <button class="menu-item-btn" id="openVerifyBtn">
             <span>🛡️</span> Verify ID &amp; Provenance
           </button>
@@ -756,7 +759,7 @@
     <section class="hero">
       <span class="hero-tag">// HARDWARE &amp; AUTOMATION LAB</span>
       <h1>CRAFTED HARDWARE.<br>CUSTOM CODE DROPS.</h1>
-      <p>Custom builds, hardware automation kits, and open-source scripts.</p>
+      <p>Custom builds, hardware automation kits, and source-available code drops.</p>
     </section>
 
     <main class="section-container">
@@ -847,7 +850,7 @@
       <!-- Right Bidding Terminal -->
       <div style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:1.75rem; display:flex; flex-direction:column; gap:1.25rem;">
         
-        <!-- Admin Auction Control Panel (Only appears when Admin is signed in) -->
+        <!-- Admin Auction Control Panel -->
         <div id="adminAuctionBar" style="display:none; background:rgba(212,175,55,0.1); border:1px solid #d4af37; border-radius:8px; padding:0.75rem; font-family:var(--font-code); font-size:0.75rem;">
           <div style="font-weight:800; color:#d4af37; margin-bottom:0.4rem;">⚡ ADMIN AUCTION CONDUCTOR</div>
           <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
@@ -1579,37 +1582,6 @@
       if (activeAuctionData) renderBidActionBox(activeAuctionData);
     });
 
-    // --- INLINE SVG BADGE GENERATOR (FOR CARD META ROW & DETAIL HEADER) ---
-    function renderRarityBadgeHTML(item) {
-      const rarity = (item.rarity || 'common').toLowerCase();
-      const rarityLabel = item.rarityLabel || rarity.toUpperCase();
-      const madeCount = item.madeCount || '50';
-      const futurePlan = item.futurePlan || 'Limited Runs';
-      const clickHandler = `onclick="showRarityDetails(event, '${item.title.replace(/'/g, "\\'")}', '${rarity}', '${madeCount}', '${futurePlan}')"`;
-
-      if (rarity === 'vaulted') {
-        const uid = Math.random().toString(36).substring(2, 8);
-        return `
-          <div class="rarity-badge-svg-wrap" ${clickHandler}>
-            ${getVaultedBannerSVG(uid)}
-          </div>
-        `;
-      } else if (rarity === 'legendary') {
-        const uid = Math.random().toString(36).substring(2, 8);
-        return `
-          <div class="rarity-badge-svg-wrap" ${clickHandler}>
-            ${getLegendaryBannerSVG(uid)}
-          </div>
-        `;
-      } else {
-        return `
-          <span class="rarity-badge rarity-${rarity}" ${clickHandler}>
-            ${rarityLabel}
-          </span>
-        `;
-      }
-    }
-
     // --- LIVE AUCTION ARENA CONTROLLER ---
     window.openAuctionRoom = function(auctionId) {
       document.getElementById('shopView').style.display = 'none';
@@ -1629,7 +1601,6 @@
       
       currentAuctionUnsub = onSnapshot(auctionRef, (docSnap) => {
         if (!docSnap.exists()) {
-          // Initialize fallback auction document if it does not exist yet
           const fallbackAuction = {
             id: auctionId,
             title: "Omni Core Handheld [1 of 1 Public Unit]",
@@ -1674,7 +1645,6 @@
       const adminBar = document.getElementById('adminAuctionBar');
       if (adminBar) adminBar.style.display = isUserAdmin ? 'block' : 'none';
 
-      // Start live countdown timer
       if (timerInterval) clearInterval(timerInterval);
       const timerEl = document.getElementById('auctionTimer');
 
@@ -2030,7 +2000,6 @@
         const res = await fetch('./projects.json?t=' + Date.now());
         projects = await res.json();
 
-        // Sync with Firestore Inventory
         for (const item of projects) {
           try {
             const docRef = doc(db, "inventory", item.id);
@@ -2442,10 +2411,8 @@
         if (f === 'all') {
           renderGrid(projects);
         } else if (f === 'auction') {
-          // Exclusively show Auction / Vaulted drops
           renderGrid(projects.filter(p => p.isAuction || p.rarity === 'vaulted' || p.category === 'auction'));
         } else if (f === 'craft') {
-          // Hardware Drops ONLY (Excludes vaulted / auction items)
           renderGrid(projects.filter(p => p.category === 'craft' && !p.isAuction && p.rarity !== 'vaulted'));
         } else {
           renderGrid(projects.filter(p => p.category === f));
