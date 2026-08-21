@@ -109,13 +109,30 @@
       letter-spacing: 0.5px;
     }
 
-    .nav-actions { display: flex; gap: 1rem; align-items: center; }
+    .nav-actions { display: flex; gap: 0.75rem; align-items: center; }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 0.5rem 0.85rem;
+      border-radius: 6px;
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .nav-btn:hover { border-color: var(--accent); color: var(--accent-neon); }
 
     .cart-btn {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--card-border);
       color: var(--text);
-      padding: 0.5rem 1rem;
+      padding: 0.5rem 0.9rem;
       border-radius: 6px;
       font-family: var(--font-code);
       font-size: 0.85rem;
@@ -147,6 +164,11 @@
       box-shadow: 0 0 15px var(--accent-glow);
       font-size: 0.875rem;
       font-family: var(--font-main);
+      transition: all 0.2s ease;
+    }
+    .btn-glow:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 0 20px var(--accent-glow);
     }
 
     .profile-container { position: relative; display: none; }
@@ -157,8 +179,8 @@
 
     .user-menu {
       position: absolute; right: 0; top: calc(100% + 0.75rem);
-      width: 260px; background: #0d1117; border: 1px solid var(--card-border);
-      border-radius: 12px; padding: 1rem; display: none; flex-direction: column; gap: 0.6rem;
+      width: 270px; background: #0d1117; border: 1px solid var(--card-border);
+      border-radius: 12px; padding: 1rem; display: none; flex-direction: column; gap: 0.5rem;
       z-index: 600; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
     }
     [data-theme="light"] .user-menu { background: #ffffff; }
@@ -641,7 +663,7 @@
     footer { text-align: center; padding: 2rem; border-top: 1px solid var(--card-border); color: var(--muted); font-size: 0.8rem; font-family: var(--font-code); }
 
     /* Mobile Viewport Adaptation */
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
       nav {
         padding: 0.75rem 1rem;
         gap: 0.5rem;
@@ -658,7 +680,11 @@
         display: none;
       }
       .nav-actions {
-        gap: 0.5rem;
+        gap: 0.4rem;
+      }
+      .nav-btn {
+        padding: 0.4rem 0.55rem;
+        font-size: 0.72rem;
       }
       .cart-btn {
         padding: 0.4rem 0.65rem;
@@ -670,7 +696,7 @@
       }
       .user-menu {
         right: 0;
-        width: 230px;
+        width: 240px;
       }
       .cart-drawer {
         width: 100%;
@@ -697,6 +723,11 @@
     </a>
     
     <div class="nav-actions">
+      <!-- Direct Authenticity / Provenance Verification Terminal Trigger -->
+      <button class="nav-btn" id="openVerifyBtn">
+        <span>🛡️</span> VERIFY ID
+      </button>
+
       <button class="cart-btn" id="openCartBtn">
         🛒 CART <span class="cart-count" id="cartBadge">0</span>
       </button>
@@ -709,6 +740,10 @@
           <span class="user-name" id="userName">User Name</span>
           <span class="user-email" id="userEmail">user@gmail.com</span>
           
+          <button class="menu-item-btn" id="openCodeVaultBtn">
+            <span>🔐</span> My Digital Code Locker
+          </button>
+
           <button class="menu-item-btn" id="openOrdersBtn">
             <span>📦</span> My Orders &amp; Receipts
           </button>
@@ -750,6 +785,7 @@
           <button class="filter-btn active" data-filter="all">ALL</button>
           <button class="filter-btn" data-filter="craft">HARDWARE DROPS</button>
           <button class="filter-btn" data-filter="code">SCRIPTS &amp; SCHEMATICS</button>
+          <button class="filter-btn" data-filter="auction" style="color: #ff2a4b; font-weight: 700;">⚡ LIVE AUCTION ARENA</button>
         </div>
       </div>
 
@@ -810,6 +846,50 @@
     </div>
   </div>
 
+  <!-- VIEW 3: LIVE VAULTED AUCTION ARENA -->
+  <div id="auctionView" style="display:none; max-width:1150px; margin:0 auto; padding:2rem 1.5rem 5rem;">
+    <button class="back-btn" onclick="showShopView()">&larr; BACK TO SHOP</button>
+
+    <div style="display:grid; grid-template-columns:1.15fr 1fr; gap:2.5rem; align-items:start;">
+      <!-- Left Showcase -->
+      <div style="background:#080c14; border:1px solid var(--card-border); border-radius:16px; padding:1.5rem;">
+        <div id="auctionBannerSlot" style="margin-bottom:1rem; cursor:pointer;"></div>
+        <img id="auctionItemImg" src="" style="width:100%; height:320px; object-fit:contain; border-radius:8px; background:#020001; margin-bottom:1rem;" />
+        <h2 id="auctionTitle" style="font-family:var(--font-code); font-size:1.4rem;"></h2>
+        <p id="auctionDesc" style="color:var(--muted); font-size:0.9rem; line-height:1.5; margin-top:0.5rem;"></p>
+        
+        <div style="margin-top:1.25rem; padding:0.85rem; background:rgba(255,255,255,0.02); border:1px solid var(--card-border); border-radius:8px; font-size:0.8rem; font-family:var(--font-code); line-height:1.6;">
+          <div style="color:#d4af37; font-weight:700;">📦 ROYAL PRESENTATION DOSSIER INCLUDED:</div>
+          <div style="color:var(--muted);">Custom carved wooden display case • 0.8mm Laser-engraved metal certificate card • Dual-depth wax-sealed royal parchment dossier.</div>
+        </div>
+      </div>
+
+      <!-- Right Bidding Terminal -->
+      <div style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:1.75rem; display:flex; flex-direction:column; gap:1.25rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--card-border); padding-bottom:1rem;">
+          <span class="tag" style="background:rgba(239,68,68,0.15); color:#ef4444; border-color:#ef4444;" id="auctionLiveBadge">🔴 LIVE VAULT AUCTION</span>
+          <div style="font-family:var(--font-code); font-size:0.85rem; color:var(--accent-neon);">
+            ENDS IN: <span id="auctionTimer" style="font-weight:800; font-size:1.05rem; color:#fff;">--:--:--</span>
+          </div>
+        </div>
+
+        <div style="text-align:center; padding:1.25rem; background:#04060a; border:1px solid var(--card-border); border-radius:10px;">
+          <div style="font-family:var(--font-code); font-size:0.75rem; color:var(--muted); letter-spacing:1px;">CURRENT HIGHEST BID</div>
+          <div id="highestBidDisplay" style="font-family:var(--font-code); font-size:2.4rem; font-weight:800; color:var(--accent-neon); margin:0.35rem 0;">₹0</div>
+          <div id="highestBidderName" style="font-family:var(--font-code); font-size:0.85rem; color:#d4af37;">Reserve Open</div>
+        </div>
+
+        <div>
+          <div style="font-family:var(--font-code); font-size:0.75rem; color:var(--muted); margin-bottom:0.4rem;">LIVE BID LEDGER</div>
+          <div id="bidHistoryContainer" style="height:150px; overflow-y:auto; background:#020001; border:1px solid var(--card-border); border-radius:8px; padding:0.5rem; display:flex; flex-direction:column; gap:0.4rem;"></div>
+        </div>
+
+        <!-- Injected Bid Action Controls based on User Auth -->
+        <div id="bidActionArea"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- INTERACTIVE RARITY POPUP MODAL (SHOWS FULL-SIZE BANNER & SPECS) -->
   <div id="rarityModal" class="popup-modal">
     <div class="popup-modal-content" style="text-align:center;">
@@ -819,6 +899,47 @@
       <p id="modalFuture">Future Runs: None</p>
       <p id="modalStatus" class="status-highlight"></p>
       <button class="close-modal-btn" id="closeRarityBtn">CLOSE</button>
+    </div>
+  </div>
+
+  <!-- PROVENANCE & AUTHENTICITY VERIFICATION MODAL -->
+  <div id="verifyModal" class="popup-modal">
+    <div class="popup-modal-content" style="max-width:520px;">
+      <h3 style="color:var(--accent-neon); font-family:var(--font-code);">🛡️ Provenance &amp; Authenticity Terminal</h3>
+      <p style="font-size:0.85rem; color:var(--muted); margin-bottom:1rem;">
+        Enter the engraved hardware serial number and the secret scratch key from your metal certificate card:
+      </p>
+
+      <div style="display:flex; flex-direction:column; gap:0.75rem;">
+        <div>
+          <label style="font-family:var(--font-code); font-size:0.7rem; color:var(--muted); text-transform:uppercase;">Chassis Serial / IMEI Number</label>
+          <input type="text" id="verifySerialInput" class="review-input" placeholder="e.g. OMNI-VLT-02" style="margin-top:0.25rem; text-transform:uppercase;">
+        </div>
+
+        <div>
+          <label style="font-family:var(--font-code); font-size:0.7rem; color:var(--muted); text-transform:uppercase;">Scratch-off Secret Key</label>
+          <input type="text" id="verifyKeyInput" class="review-input" placeholder="e.g. X9F2-K89A" style="margin-top:0.25rem; text-transform:uppercase;">
+        </div>
+
+        <button class="btn-glow" id="verifySubmitBtn" style="width:100%; margin-top:0.25rem;">VERIFY PROVENANCE</button>
+      </div>
+
+      <div id="verifyResultArea" style="margin-top:1rem;"></div>
+      <button class="close-modal-btn" id="closeVerifyBtn" style="margin-top:1rem;">CLOSE</button>
+    </div>
+  </div>
+
+  <!-- DIGITAL CODE LOCKER MODAL -->
+  <div id="codeVaultModal" class="popup-modal">
+    <div class="popup-modal-content" style="max-height:85vh; display:flex; flex-direction:column; max-width:550px;">
+      <h3 style="font-family:var(--font-code); color:var(--accent-neon);">🔐 My Digital Code Locker</h3>
+      <p style="color:var(--muted); font-size:0.8rem; margin-bottom:1rem;">Your purchased firmware, scripts, and CAD schematics tied to your Google account.</p>
+      
+      <div id="codeVaultItems" style="overflow-y:auto; display:flex; flex-direction:column; gap:0.75rem; max-height:360px;">
+        <p style="color:var(--muted); font-size:0.85rem; text-align:center;">Loading digital locker...</p>
+      </div>
+      
+      <button class="close-modal-btn" id="closeCodeVaultBtn">CLOSE</button>
     </div>
   </div>
 
@@ -936,6 +1057,11 @@
     let currentReviewsList = [];
     let activeCoupon = null;
     let liveStockMap = {};
+
+    // Live Auction State
+    let currentAuctionUnsub = null;
+    let currentBidsUnsub = null;
+    let activeAuctionData = null;
 
     // --- Strict Inventory-Bound Cart State ---
     let cart = JSON.parse(localStorage.getItem('omnimade_cart_map')) || {};
@@ -1253,6 +1379,133 @@
       document.getElementById('rarityModal').style.display = 'none';
     };
 
+    // --- PROVENANCE & AUTHENTICITY VERIFICATION TERMINAL ---
+    document.getElementById('openVerifyBtn').onclick = () => {
+      document.getElementById('verifyModal').style.display = 'flex';
+      document.getElementById('verifyResultArea').innerHTML = '';
+      document.getElementById('verifySerialInput').value = '';
+      document.getElementById('verifyKeyInput').value = '';
+    };
+
+    document.getElementById('closeVerifyBtn').onclick = () => {
+      document.getElementById('verifyModal').style.display = 'none';
+    };
+
+    document.getElementById('verifySubmitBtn').onclick = async () => {
+      const serial = document.getElementById('verifySerialInput').value.trim().toUpperCase();
+      const secret = document.getElementById('verifyKeyInput').value.trim().toUpperCase();
+      const resultArea = document.getElementById('verifyResultArea');
+
+      if (!serial || !secret) {
+        return alert("Please enter both the engraved Chassis Serial and the scratch Secret Key.");
+      }
+
+      resultArea.innerHTML = `<div style="color:var(--muted); font-family:var(--font-code); text-align:center;">Validating cryptographic pair...</div>`;
+
+      try {
+        const docRef = doc(db, "authenticity", serial);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists() && docSnap.data().secretKey.toUpperCase() === secret) {
+          const data = docSnap.data();
+          const isVaulted = (data.rarity || '').toLowerCase() === 'vaulted';
+          
+          resultArea.innerHTML = `
+            <div style="background:rgba(34,197,94,0.08); border:1px solid #22c55e; border-radius:8px; padding:1rem; text-align:center;">
+              <div style="font-size:0.9rem; font-weight:800; font-family:var(--font-code); color:#22c55e;">
+                ✅ GENUINE OMNIMADE HARDWARE VERIFIED
+              </div>
+              <div style="margin:0.75rem 0;">
+                ${isVaulted ? getVaultedBannerSVG('verify_ok_banner') : getLegendaryBannerSVG('verify_ok_banner')}
+              </div>
+              <div style="font-family:var(--font-code); font-size:0.8rem; line-height:1.6; text-align:left; background:#04060a; padding:0.75rem; border-radius:6px; border:1px solid var(--card-border);">
+                <div><strong>Product:</strong> ${data.productTitle}</div>
+                <div><strong>Chassis Serial:</strong> ${serial}</div>
+                <div><strong>Provenance:</strong> ${data.batchInfo || 'Maker Certified'}</div>
+                <div><strong>Status:</strong> ${data.isClaimed ? `Claimed by Verified Collector` : `Unregistered Original (Ready to Claim)`}</div>
+              </div>
+            </div>
+          `;
+        } else {
+          resultArea.innerHTML = `
+            <div style="background:rgba(239,68,68,0.1); border:1px solid #ef4444; border-radius:8px; padding:1rem; text-align:center;">
+              <div style="font-weight:800; color:#ef4444; font-family:var(--font-code);">❌ AUTHENTICATION FAILED</div>
+              <div style="font-size:0.8rem; color:var(--muted); margin-top:0.3rem;">No matching registered chassis serial or valid cryptographic secret found in the lab database.</div>
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error(err);
+        resultArea.innerHTML = `<div style="color:var(--danger); font-size:0.8rem; text-align:center;">Unable to contact authentication servers.</div>`;
+      }
+    };
+
+    // --- DIGITAL CODE LOCKER CONTROLLER ---
+    window.triggerDirectDownload = function(fileUrl, fileName) {
+      const anchor = document.createElement('a');
+      anchor.href = fileUrl;
+      anchor.download = fileName || 'Omnimade_Source_Package.zip';
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+    };
+
+    document.getElementById('openCodeVaultBtn').onclick = () => {
+      document.getElementById('userMenu').classList.remove('active');
+      document.getElementById('codeVaultModal').style.display = 'flex';
+      loadUserCodeLocker();
+    };
+
+    document.getElementById('closeCodeVaultBtn').onclick = () => {
+      document.getElementById('codeVaultModal').style.display = 'none';
+    };
+
+    async function loadUserCodeLocker() {
+      const container = document.getElementById('codeVaultItems');
+      if (!currentUser) {
+        container.innerHTML = `<div style="color:var(--muted); text-align:center; padding:1.5rem;">Please sign in to view your purchased digital drops.</div>`;
+        return;
+      }
+
+      try {
+        const q = query(collection(db, "orders"), where("userId", "==", currentUser.uid));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          container.innerHTML = `<div style="color:var(--muted); text-align:center; padding:1.5rem;">No digital drops purchased yet.</div>`;
+          return;
+        }
+
+        let html = '';
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const items = data.items || [];
+          
+          items.forEach(item => {
+            if (item.category === 'code' || item.downloadUrl) {
+              const fileLink = item.downloadUrl || "https://github.com/mohd-shahid-kohri";
+              html += `
+                <div style="background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:8px; padding:0.85rem; display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <div style="font-weight:700; font-size:0.9rem;">${item.title}</div>
+                    <div style="font-family:var(--font-code); font-size:0.7rem; color:var(--accent-neon); margin-top:0.2rem;">LICENSE: OMNI-LIFETIME-ACTIVE</div>
+                  </div>
+                  <button class="btn-glow" style="padding:0.4rem 0.8rem; font-size:0.75rem;" onclick="triggerDirectDownload('${fileLink}', '${item.title.replace(/\s+/g, '_')}_Source.zip')">
+                    ⬇ DOWNLOAD ZIP
+                  </button>
+                </div>
+              `;
+            }
+          });
+        });
+
+        container.innerHTML = html || `<div style="color:var(--muted); text-align:center; padding:1.5rem;">No digital script packages in your order history.</div>`;
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = `<div style="color:var(--danger); text-align:center; padding:1.5rem;">Failed to load code vault.</div>`;
+      }
+    }
+
     // --- POPUP MODAL CONTROLLERS ---
     document.getElementById('openSupportBtn').onclick = () => {
       document.getElementById('userMenu').classList.remove('active');
@@ -1326,6 +1579,7 @@
       }
 
       if (activeProductId) renderReviewsList(currentReviewsList);
+      if (activeAuctionData) renderBidActionBox(activeAuctionData);
     });
 
     // --- INLINE SVG BADGE GENERATOR (FOR CARD META ROW & DETAIL HEADER) ---
@@ -1359,6 +1613,168 @@
       }
     }
 
+    // --- LIVE AUCTION ARENA CONTROLLER ---
+    window.openAuctionRoom = function(auctionId) {
+      document.getElementById('shopView').style.display = 'none';
+      document.getElementById('productPageView').style.display = 'none';
+      document.getElementById('auctionView').style.display = 'block';
+      window.scrollTo(0, 0);
+
+      listenToLiveAuction(auctionId);
+    };
+
+    function listenToLiveAuction(auctionId) {
+      if (currentAuctionUnsub) currentAuctionUnsub();
+      if (currentBidsUnsub) currentBidsUnsub();
+
+      const auctionRef = doc(db, "auctions", auctionId);
+      
+      currentAuctionUnsub = onSnapshot(auctionRef, (docSnap) => {
+        if (!docSnap.exists()) {
+          // Initialize fallback auction document if it does not exist yet
+          const fallbackAuction = {
+            id: auctionId,
+            title: "Omni Core Handheld [1 of 1 Public Unit]",
+            rarity: "vaulted",
+            currentBid: 24999,
+            minBidIncrement: 500,
+            status: "live",
+            image: "./Assets/VAULTED_UNIT.jpg",
+            description: "Ultra-complex handcrafted build. Unit 02/02. Housed in a custom carved wooden presentation case with wax-sealed metal authentication dossier."
+          };
+          activeAuctionData = fallbackAuction;
+          renderAuctionDetails(fallbackAuction);
+          return;
+        }
+        activeAuctionData = { id: docSnap.id, ...docSnap.data() };
+        renderAuctionDetails(activeAuctionData);
+      });
+
+      const bidsQuery = query(collection(db, "auctions", auctionId, "bids"));
+      currentBidsUnsub = onSnapshot(bidsQuery, (snapshot) => {
+        const bids = [];
+        snapshot.forEach(d => bids.push(d.data()));
+        bids.sort((a, b) => b.amount - a.amount);
+        renderBidHistory(bids);
+      });
+    }
+
+    function renderAuctionDetails(data) {
+      const bannerSlot = document.getElementById('auctionBannerSlot');
+      bannerSlot.innerHTML = getVaultedBannerSVG('auction_live_hdr');
+      bannerSlot.onclick = (e) => showRarityDetails(e, data.title, data.rarity, "2 Total", "Permanent Vault");
+
+      document.getElementById('auctionTitle').innerText = data.title;
+      document.getElementById('auctionDesc').innerText = data.description || "Limited edition hardware drop.";
+      document.getElementById('auctionItemImg').src = data.image || "./Assets/VAULTED_UNIT.jpg";
+      document.getElementById('highestBidDisplay').innerText = `₹${data.currentBid.toLocaleString('en-IN')}`;
+      document.getElementById('highestBidderName').innerText = data.highestBidderName 
+        ? `Highest Bidder: ${data.highestBidderName}` 
+        : "Starting Reserve: Available";
+
+      renderBidActionBox(data);
+    }
+
+    function renderBidHistory(bids) {
+      const container = document.getElementById('bidHistoryContainer');
+      if (!bids.length) {
+        container.innerHTML = `<div style="color:var(--muted); font-size:0.75rem; text-align:center; padding:1rem;">Waiting for the opening bid...</div>`;
+        return;
+      }
+      container.innerHTML = bids.map(b => `
+        <div style="display:flex; justify-content:space-between; font-family:var(--font-code); font-size:0.75rem; padding:0.35rem 0.5rem; background:rgba(255,255,255,0.02); border-radius:4px;">
+          <span style="color:#d4af37;">${b.bidderName}</span>
+          <span style="color:var(--accent-neon); font-weight:700;">₹${b.amount.toLocaleString('en-IN')}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderBidActionBox(auction) {
+      const container = document.getElementById('bidActionArea');
+      
+      if (auction.status === 'ended') {
+        const isWinner = currentUser && currentUser.uid === auction.highestBidderUid;
+        if (isWinner && !auction.winnerPaid) {
+          container.innerHTML = `
+            <div style="text-align:center; padding:0.85rem; background:rgba(34,197,94,0.1); border:1px solid #22c55e; border-radius:8px;">
+              <div style="font-weight:800; color:#22c55e; font-family:var(--font-code);">🏆 YOU WON THIS AUCTION!</div>
+              <p style="font-size:0.8rem; color:var(--muted); margin:0.3rem 0 0.8rem;">Complete settlement to initiate custom wooden case packing &amp; dispatch.</p>
+              <button class="btn-glow" style="width:100%; background:#22c55e; color:#000;" onclick="settleAuctionPayment('${auction.id}', ${auction.currentBid})">COMPLETE PAYMENT NOW (₹${auction.currentBid})</button>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div style="text-align:center; padding:1rem; background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:8px; font-family:var(--font-code); color:var(--muted);">
+              🔒 AUCTION CONCLUDED • FINAL SETTLEMENT IN PROGRESS
+            </div>
+          `;
+        }
+        return;
+      }
+
+      if (!currentUser) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:1rem; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); border-radius:8px;">
+            <div style="font-size:0.85rem; font-family:var(--font-code); color:#ff8ca3; margin-bottom:0.6rem;">🔒 You must be signed in to place a bid.</div>
+            <button class="btn-glow" style="width:100%;" onclick="signInWithPopup(auth, provider)">Sign In With Google To Bid</button>
+          </div>
+        `;
+        return;
+      }
+
+      const nextMinBid = auction.currentBid + (auction.minBidIncrement || 500);
+      container.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:0.6rem;">
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn-glow" style="flex:1; background:rgba(255,255,255,0.08); border:1px solid var(--card-border);" onclick="placeQuickBid(${auction.currentBid + 500})">+ ₹500</button>
+            <button class="btn-glow" style="flex:1; background:rgba(255,255,255,0.08); border:1px solid var(--card-border);" onclick="placeQuickBid(${auction.currentBid + 1000})">+ ₹1,000</button>
+            <button class="btn-glow" style="flex:1; background:rgba(255,255,255,0.08); border:1px solid var(--card-border);" onclick="placeQuickBid(${auction.currentBid + 2500})">+ ₹2,500</button>
+          </div>
+          <button class="btn-glow" style="width:100%; font-size:0.95rem; padding:0.85rem;" onclick="placeQuickBid(${nextMinBid})">
+            BID ₹${nextMinBid.toLocaleString('en-IN')} NOW
+          </button>
+        </div>
+      `;
+    }
+
+    window.placeQuickBid = async function(newAmount) {
+      if (!currentUser || !activeAuctionData) return;
+      if (newAmount <= activeAuctionData.currentBid) {
+        return alert(`Bid must exceed current highest bid of ₹${activeAuctionData.currentBid}`);
+      }
+
+      try {
+        const auctionRef = doc(db, "auctions", activeAuctionData.id);
+        
+        await setDoc(auctionRef, {
+          ...activeAuctionData,
+          currentBid: newAmount,
+          highestBidderUid: currentUser.uid,
+          highestBidderName: currentUser.displayName || "Omni Bidder",
+          lastBidTimestamp: serverTimestamp()
+        }, { merge: true });
+
+        await addDoc(collection(db, "auctions", activeAuctionData.id, "bids"), {
+          bidderUid: currentUser.uid,
+          bidderName: currentUser.displayName || "Omni Bidder",
+          amount: newAmount,
+          createdAt: serverTimestamp()
+        });
+
+      } catch (err) {
+        console.error("Bid error:", err);
+        alert("Failed to submit bid. Please check your connection.");
+      }
+    };
+
+    window.settleAuctionPayment = function(auctionId, finalAmount) {
+      triggerRazorpayPayment(
+        finalAmount,
+        `Winning Settlement for ${activeAuctionData.title}`,
+        [{ id: activeAuctionData.id, title: activeAuctionData.title, priceNumeric: finalAmount, quantity: 1 }]
+      );
+    };
+
     // --- STRICT CART INVENTORY CONTROLLER ---
     window.modifyCartQuantity = function(productId, delta) {
       const available = getAvailableStock(productId);
@@ -1386,6 +1802,11 @@
     };
 
     window.buyNow = function(productId) {
+      const item = projects.find(p => p.id === productId);
+      if (item && item.isAuction) {
+        return openAuctionRoom(item.id);
+      }
+
       const available = getAvailableStock(productId);
       if (available <= 0) return alert('Sorry, this drop is currently out of stock.');
 
@@ -1401,6 +1822,11 @@
     };
 
     window.addToCart = function(productId) {
+      const item = projects.find(p => p.id === productId);
+      if (item && item.isAuction) {
+        return openAuctionRoom(item.id);
+      }
+
       const available = getAvailableStock(productId);
       if (available <= 0) return alert('Sorry, this drop is currently out of stock.');
 
@@ -1568,9 +1994,12 @@
         const stockLeft = typeof liveStockMap[item.id] === 'number' ? liveStockMap[item.id] : (item.stock ?? 50);
         const isOutOfStock = stockLeft <= 0;
         const isLowStock = stockLeft > 0 && stockLeft < 10;
+        const isAuction = item.isAuction || item.rarity === 'vaulted';
 
         let stockNotice = '';
-        if (isOutOfStock) {
+        if (isAuction) {
+          stockNotice = `<div class="stock-warning" style="color:#d4af37;">⚡ LIVE BIDDING ARENA ACTIVE</div>`;
+        } else if (isOutOfStock) {
           stockNotice = `<div class="stock-warning">🔴 OUT OF STOCK</div>`;
         } else if (isLowStock) {
           stockNotice = `<div class="stock-warning">⚠️ ONLY ${stockLeft} UNITS LEFT!</div>`;
@@ -1578,7 +2007,7 @@
 
         return `
         <div class="card">
-          <div class="card-thumb-wrap" onclick="openProductPage('${item.id}')">
+          <div class="card-thumb-wrap" onclick="${isAuction ? `openAuctionRoom('${item.id}')` : `openProductPage('${item.id}')`}">
             <img src="${item.image}" class="card-thumb" alt="${item.title}">
           </div>
           <div class="card-body">
@@ -1586,13 +2015,17 @@
               <span class="tag">${item.badge || 'DROP'}</span>
               ${renderRarityBadgeHTML(item)}
             </div>
-            <h3 class="card-title" onclick="openProductPage('${item.id}')">${item.title}</h3>
+            <h3 class="card-title" onclick="${isAuction ? `openAuctionRoom('${item.id}')` : `openProductPage('${item.id}')`}">${item.title}</h3>
             <p class="card-desc">${item.description}</p>
-            <div style="font-family: var(--font-code); font-weight:700; font-size:1.1rem; color: var(--accent-neon);">${item.price}</div>
+            <div style="font-family: var(--font-code); font-weight:700; font-size:1.1rem; color: var(--accent-neon);">${isAuction ? `Starting Reserve: ${item.price}` : item.price}</div>
             ${stockNotice}
             <div class="card-actions-group">
-              <button class="btn-cart ${isOutOfStock ? 'btn-disabled' : ''}" onclick="addToCart('${item.id}')">${isOutOfStock ? 'OUT OF STOCK' : 'ADD TO CART'}</button>
-              <button class="btn-buy ${isOutOfStock ? 'btn-disabled' : ''}" onclick="buyNow('${item.id}')">${isOutOfStock ? 'SOLD OUT' : 'BUY NOW'}</button>
+              ${isAuction ? `
+                <button class="btn-buy" style="background:#ff2a4b; width:100%;" onclick="openAuctionRoom('${item.id}')">⚡ ENTER AUCTION ROOM</button>
+              ` : `
+                <button class="btn-cart ${isOutOfStock ? 'btn-disabled' : ''}" onclick="addToCart('${item.id}')">${isOutOfStock ? 'OUT OF STOCK' : 'ADD TO CART'}</button>
+                <button class="btn-buy ${isOutOfStock ? 'btn-disabled' : ''}" onclick="buyNow('${item.id}')">${isOutOfStock ? 'SOLD OUT' : 'BUY NOW'}</button>
+              `}
             </div>
           </div>
         </div>
@@ -1683,6 +2116,7 @@
       listenToReviews(id);
 
       document.getElementById('shopView').style.display = 'none';
+      document.getElementById('auctionView').style.display = 'none';
       document.getElementById('productPageView').style.display = 'block';
       window.scrollTo(0, 0);
     };
@@ -1695,9 +2129,11 @@
 
     function showShopView() {
       document.getElementById('productPageView').style.display = 'none';
+      document.getElementById('auctionView').style.display = 'none';
       document.getElementById('shopView').style.display = 'block';
       window.scrollTo(0, 0);
     }
+    window.showShopView = showShopView;
 
     document.getElementById('backToShopBtn').addEventListener('click', showShopView);
     document.getElementById('navHomeLink').addEventListener('click', showShopView);
@@ -1730,7 +2166,6 @@
               createdAt: serverTimestamp()
             });
 
-            // Decrement live stock for each item by its ordered quantity
             for (const orderItem of orderItemsArray) {
               if (orderItem.id) {
                 const itemRef = doc(db, "inventory", orderItem.id);
@@ -1748,7 +2183,7 @@
             console.error("Firestore order/stock error:", e);
           }
 
-          alert("🎉 Payment Successful! Order Reference: " + response.razorpay_payment_id + "\nYour parcel tracking info will be emailed to you.");
+          alert("🎉 Payment Successful! Order Reference: " + response.razorpay_payment_id + "\nYour parcel tracking info and certificate will be prepared.");
           cart = {};
           saveCart();
           document.getElementById('cartDrawer').classList.remove('active');
@@ -1786,6 +2221,8 @@
           title: item.title,
           price: item.price,
           priceNumeric: item.priceNumeric,
+          category: item.category,
+          downloadUrl: item.downloadUrl,
           quantity: qty
         });
       }
@@ -1935,8 +2372,14 @@
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
         const f = e.target.getAttribute('data-filter');
-        if (f === 'all') renderGrid(projects);
-        else renderGrid(projects.filter(p => p.category === f));
+        
+        if (f === 'all') {
+          renderGrid(projects);
+        } else if (f === 'auction') {
+          renderGrid(projects.filter(p => p.isAuction || p.rarity === 'vaulted'));
+        } else {
+          renderGrid(projects.filter(p => p.category === f));
+        }
       });
     });
 
