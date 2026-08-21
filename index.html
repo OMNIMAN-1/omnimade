@@ -4,8 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="description" content="OMNIMADE Lab: Crafted hardware, custom automation kits, and source-available code drops." />
   <meta name="google-site-verification" content="qYSuxB1Q9f54JZeBAc3ldoS1RFn4hJl0FpK61dOAMg0" />
+
+  <!-- Favicon References -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
   <!-- O//M Circular Monogram Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 4C9.37 4 4 9.37 4 16C4 22.63 9.37 28 16 28C22.63 28 28 22.63 28 16' fill='none' stroke='%233b82f6' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M11 20V12L16 16.5L21 12V20' fill='none' stroke='%2300f0ff' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>OMNIMADE | Hardware &amp; Automation Lab</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -149,6 +155,11 @@
       box-shadow: 0 0 15px var(--accent-glow);
       font-size: 0.875rem;
       font-family: var(--font-main);
+      transition: all 0.2s ease;
+    }
+    .btn-glow:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 0 20px var(--accent-glow);
     }
 
     .profile-container { position: relative; display: none; }
@@ -159,7 +170,7 @@
 
     .user-menu {
       position: absolute; right: 0; top: calc(100% + 0.75rem);
-      width: 260px; background: #0d1117; border: 1px solid var(--card-border);
+      width: 275px; background: #0d1117; border: 1px solid var(--card-border);
       border-radius: 12px; padding: 1rem; display: none; flex-direction: column; gap: 0.6rem;
       z-index: 600; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
     }
@@ -210,6 +221,7 @@
     .filter-btn {
       background: transparent; border: 1px solid transparent; color: var(--muted);
       padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; font-family: var(--font-code); cursor: pointer;
+      transition: all 0.2s ease;
     }
     .filter-btn.active, .filter-btn:hover { background: var(--card-bg); border-color: var(--card-border); color: var(--text); }
 
@@ -1404,9 +1416,357 @@
       document.getElementById('ordersModal').style.display = 'none';
     };
 
+    // --- AUTHENTICITY TERMINAL (PROVENANCE MODAL) ---
+    document.getElementById('openVerifyBtn').onclick = () => {
+      document.getElementById('userMenu').classList.remove('active');
+      document.getElementById('verifyModal').style.display = 'flex';
+      document.getElementById('verifyResultArea').innerHTML = '';
+      document.getElementById('verifyScrambleInput').value = '';
+    };
+
+    document.getElementById('closeVerifyBtn').onclick = () => {
+      document.getElementById('verifyModal').style.display = 'none';
+    };
+
+    document.getElementById('verifySubmitBtn').onclick = async () => {
+      const token = document.getElementById('verifyScrambleInput').value.trim().toUpperCase();
+      const resultArea = document.getElementById('verifyResultArea');
+      if (!token) return alert("Please enter the scrambled token.");
+
+      const decoded = window.decodeScrambledAuthToken(token);
+      resultArea.innerHTML = `<div style="color:var(--muted); font-family:var(--font-code); text-align:center;">Deciphering cryptographic token stream...</div>`;
+
+      try {
+        const q = query(collection(db, "orders"), where("authToken", "==", token));
+        const snap = await getDocs(q);
+
+        if (!snap.empty) {
+          const data = snap.docs[0].data();
+          resultArea.innerHTML = `
+            <div style="background:rgba(34,197,94,0.08); border:1px solid #22c55e; border-radius:8px; padding:1rem; font-family:var(--font-code); font-size:0.8rem;">
+              <div style="color:#22c55e; font-weight:bold; margin-bottom:0.5rem;">✅ CRYPTOGRAPHIC SIGNATURE MATCHED</div>
+              <div><strong>Decoded Signature:</strong> ${decoded}</div>
+              <div><strong>Owner:</strong> ${data.customerName}</div>
+              <div><strong>Description:</strong> ${data.orderDescription}</div>
+              <div><strong>Settled Price:</strong> ₹${data.amountPaid}</div>
+            </div>
+          `;
+        } else {
+          resultArea.innerHTML = `
+            <div style="background:rgba(239,68,68,0.08); border:1px solid #ef4444; border-radius:8px; padding:1rem; font-family:var(--font-code); font-size:0.8rem; text-align:center;">
+              <div style="color:#ef4444; font-weight:bold;">❌ AUTHENTICATION FAILED</div>
+              <div style="color:var(--muted); margin-top:0.3rem;">Decoded Stream: <code>${decoded}</code> (Not found in physical provenance records)</div>
+            </div>
+          `;
+        }
+      } catch (err) {
+        resultArea.innerHTML = `<div style="color:var(--danger); font-size:0.8rem; text-align:center;">Error contacting verification ledger.</div>`;
+      }
+    };
+
+    // --- DIGITAL CODE LOCKER CONTROLLER ---
+    window.triggerDirectDownload = function(fileUrl, fileName) {
+      const anchor = document.createElement('a');
+      anchor.href = fileUrl;
+      anchor.download = fileName || 'Omnimade_Source_Package.zip';
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+    };
+
+    document.getElementById('openCodeVaultBtn').onclick = () => {
+      document.getElementById('userMenu').classList.remove('active');
+      document.getElementById('codeVaultModal').style.display = 'flex';
+      loadUserCodeLocker();
+    };
+
+    document.getElementById('closeCodeVaultBtn').onclick = () => {
+      document.getElementById('codeVaultModal').style.display = 'none';
+    };
+
+    async function loadUserCodeLocker() {
+      const container = document.getElementById('codeVaultItems');
+      if (!currentUser) {
+        container.innerHTML = `<div style="color:var(--muted); text-align:center; padding:1.5rem;">Please sign in to view your purchased digital drops.</div>`;
+        return;
+      }
+
+      try {
+        const q = query(collection(db, "orders"), where("userId", "==", currentUser.uid));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          container.innerHTML = `<div style="color:var(--muted); text-align:center; padding:1.5rem;">No digital drops purchased yet.</div>`;
+          return;
+        }
+
+        let html = '';
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const items = data.items || [];
+          
+          items.forEach(item => {
+            if (item.category === 'code' || item.downloadUrl) {
+              const fileLink = item.downloadUrl || "https://github.com/mohd-shahid-kohri";
+              html += `
+                <div style="background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:8px; padding:0.85rem; display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <div style="font-weight:700; font-size:0.9rem;">${item.title}</div>
+                    <div style="font-family:var(--font-code); font-size:0.7rem; color:var(--accent-neon); margin-top:0.2rem;">LICENSE: OMNI-LIFETIME-ACTIVE</div>
+                  </div>
+                  <button class="btn-glow" style="padding:0.4rem 0.8rem; font-size:0.75rem;" onclick="triggerDirectDownload('${fileLink}', '${item.title.replace(/\s+/g, '_')}_Source.zip')">
+                    ⬇ DOWNLOAD ZIP
+                  </button>
+                </div>
+              `;
+            }
+          });
+        });
+
+        container.innerHTML = html || `<div style="color:var(--muted); text-align:center; padding:1.5rem;">No digital script packages in your order history.</div>`;
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = `<div style="color:var(--danger); text-align:center; padding:1.5rem;">Failed to load code vault.</div>`;
+      }
+    }
+
+    // --- LIVE AUCTION ARENA CONTROLLER ---
+    window.openAuctionRoom = function(auctionId) {
+      document.getElementById('shopView').style.display = 'none';
+      document.getElementById('productPageView').style.display = 'none';
+      document.getElementById('auctionView').style.display = 'block';
+      window.scrollTo(0, 0);
+
+      listenToLiveAuction(auctionId);
+    };
+
+    function listenToLiveAuction(auctionId) {
+      if (currentAuctionUnsub) currentAuctionUnsub();
+      if (currentBidsUnsub) currentBidsUnsub();
+      if (timerInterval) clearInterval(timerInterval);
+
+      const auctionRef = doc(db, "auctions", auctionId);
+      
+      currentAuctionUnsub = onSnapshot(auctionRef, (docSnap) => {
+        if (!docSnap.exists()) {
+          const fallbackAuction = {
+            id: auctionId,
+            title: "Omni Core Handheld [1 of 1 Public Unit]",
+            rarity: "vaulted",
+            basePrice: 24999,
+            currentBid: 24999,
+            minBidIncrement: 500,
+            status: "live",
+            image: "./Assets/VAULTED_UNIT.jpg",
+            endsAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            description: "Ultra-complex handcrafted build. Unit 02/02. Housed in a custom carved wooden presentation case with wax-sealed metal authentication dossier."
+          };
+          activeAuctionData = fallbackAuction;
+          renderAuctionDetails(fallbackAuction);
+          return;
+        }
+        activeAuctionData = { id: docSnap.id, ...docSnap.data() };
+        renderAuctionDetails(activeAuctionData);
+      });
+
+      const bidsQuery = query(collection(db, "auctions", auctionId, "bids"));
+      currentBidsUnsub = onSnapshot(bidsQuery, (snapshot) => {
+        const bids = [];
+        snapshot.forEach(d => bids.push(d.data()));
+        bids.sort((a, b) => b.amount - a.amount);
+        renderBidHistory(bids);
+      });
+    }
+
+    function renderAuctionDetails(data) {
+      const bannerSlot = document.getElementById('auctionBannerSlot');
+      bannerSlot.innerHTML = getVaultedBannerSVG('auction_live_hdr');
+      bannerSlot.onclick = (e) => showRarityDetails(e, data.title, data.rarity, "2 Total", "Permanent Vault");
+
+      document.getElementById('auctionTitle').innerText = data.title;
+      document.getElementById('auctionDesc').innerText = data.description || "Limited edition hardware drop.";
+      document.getElementById('auctionItemImg').src = data.image || "./Assets/VAULTED_UNIT.jpg";
+      document.getElementById('highestBidDisplay').innerText = `₹${data.currentBid.toLocaleString('en-IN')}`;
+      document.getElementById('highestBidderName').innerText = data.highestBidderName 
+        ? `Highest Bidder: ${data.highestBidderName}` 
+        : "Starting Reserve: Available";
+
+      const adminBar = document.getElementById('adminAuctionBar');
+      if (adminBar) adminBar.style.display = isUserAdmin ? 'block' : 'none';
+
+      if (timerInterval) clearInterval(timerInterval);
+      const timerEl = document.getElementById('auctionTimer');
+
+      timerInterval = setInterval(() => {
+        if (!data.endsAt || data.status === 'ended') {
+          timerEl.innerText = "CONCLUDED";
+          return;
+        }
+
+        const diff = new Date(data.endsAt).getTime() - Date.now();
+        if (diff <= 0) {
+          timerEl.innerText = "00:00:00";
+          clearInterval(timerInterval);
+        } else {
+          const hours = Math.floor(diff / (1000 * 60 * 60));
+          const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const secs = Math.floor((diff % (1000 * 60)) / 1000);
+          timerEl.innerText = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+      }, 1000);
+
+      renderBidActionBox(data);
+    }
+
+    function renderBidHistory(bids) {
+      const container = document.getElementById('bidHistoryContainer');
+      if (!bids.length) {
+        container.innerHTML = `<div style="color:var(--muted); font-size:0.75rem; text-align:center; padding:1rem;">Waiting for the opening bid...</div>`;
+        return;
+      }
+      container.innerHTML = bids.map(b => `
+        <div style="display:flex; justify-content:space-between; font-family:var(--font-code); font-size:0.75rem; padding:0.35rem 0.5rem; background:rgba(255,255,255,0.02); border-radius:4px;">
+          <span style="color:#d4af37;">${b.bidderName}</span>
+          <span style="color:var(--accent-neon); font-weight:700;">₹${b.amount.toLocaleString('en-IN')}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderBidActionBox(auction) {
+      const container = document.getElementById('bidActionArea');
+      
+      if (auction.status === 'ended') {
+        const isWinner = currentUser && currentUser.uid === auction.highestBidderUid;
+        if (isWinner && !auction.winnerPaid) {
+          container.innerHTML = `
+            <div style="text-align:center; padding:0.85rem; background:rgba(34,197,94,0.1); border:1px solid #22c55e; border-radius:8px;">
+              <div style="font-weight:800; color:#22c55e; font-family:var(--font-code);">🏆 YOU WON THIS AUCTION!</div>
+              <p style="font-size:0.8rem; color:var(--muted); margin:0.3rem 0 0.8rem;">Complete settlement to generate your cryptographic provenance dossier.</p>
+              <button class="btn-glow" style="width:100%; background:#22c55e; color:#000;" onclick="settleAuctionPayment('${auction.id}', ${auction.currentBid})">COMPLETE PAYMENT NOW (₹${auction.currentBid})</button>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div style="text-align:center; padding:1rem; background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:8px; font-family:var(--font-code); color:var(--muted);">
+              🔒 AUCTION CONCLUDED • FINAL SETTLEMENT IN PROGRESS
+            </div>
+          `;
+        }
+        return;
+      }
+
+      if (!currentUser) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:1rem; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); border-radius:8px;">
+            <div style="font-size:0.85rem; font-family:var(--font-code); color:#ff8ca3; margin-bottom:0.6rem;">🔒 You must be signed in to place a bid.</div>
+            <button class="btn-glow" style="width:100%;" onclick="signInWithPopup(auth, provider)">Sign In With Google To Bid</button>
+          </div>
+        `;
+        return;
+      }
+
+      const nextMinBid = auction.currentBid + (auction.minBidIncrement || 500);
+      container.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:0.6rem;">
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn-glow" style="flex:1; background:rgba(255,255,255,0.08); border:1px solid var(--card-border);" onclick="placeQuickBid(${auction.currentBid + 500})">+ ₹500</button>
+            <button class="btn-glow" style="flex:1; background:rgba(255,255,255,0.08); border:1px solid var(--card-border);" onclick="placeQuickBid(${auction.currentBid + 1000})">+ ₹1,000</button>
+            <button class="btn-glow" style="flex:1; background:rgba(255,255,255,0.08); border:1px solid var(--card-border);" onclick="placeQuickBid(${auction.currentBid + 2500})">+ ₹2,500</button>
+          </div>
+          <button class="btn-glow" style="width:100%; font-size:0.95rem; padding:0.85rem;" onclick="placeQuickBid(${nextMinBid})">
+            BID ₹${nextMinBid.toLocaleString('en-IN')} NOW
+          </button>
+        </div>
+      `;
+    }
+
+    window.adminStartAuction = async function() {
+      if (!isUserAdmin || !activeAuctionData) return;
+      try {
+        const auctionRef = doc(db, "auctions", activeAuctionData.id);
+        await updateDoc(auctionRef, {
+          status: "live",
+          endsAt: new Date(Date.now() + 60 * 60 * 1000).toISOString()
+        });
+        alert("Auction initiated for 1 hour!");
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    window.adminAddAuctionTime = async function(seconds) {
+      if (!isUserAdmin || !activeAuctionData) return;
+      try {
+        const auctionRef = doc(db, "auctions", activeAuctionData.id);
+        const currentEnd = new Date(activeAuctionData.endsAt || Date.now()).getTime();
+        await updateDoc(auctionRef, { endsAt: new Date(currentEnd + seconds * 1000).toISOString() });
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    window.adminEndAuction = async function() {
+      if (!isUserAdmin || !activeAuctionData) return;
+      if (confirm(`Conclude auction and award to ${activeAuctionData.highestBidderName || 'reserve'}?`)) {
+        try {
+          const auctionRef = doc(db, "auctions", activeAuctionData.id);
+          await updateDoc(auctionRef, { status: "ended", endsAt: new Date().toISOString() });
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+
+    window.placeQuickBid = async function(newAmount) {
+      if (!currentUser || !activeAuctionData) return;
+      if (newAmount <= activeAuctionData.currentBid) return alert(`Bid must be higher than ₹${activeAuctionData.currentBid}`);
+
+      try {
+        const auctionRef = doc(db, "auctions", activeAuctionData.id);
+        await setDoc(auctionRef, {
+          ...activeAuctionData,
+          currentBid: newAmount,
+          highestBidderUid: currentUser.uid,
+          highestBidderName: currentUser.displayName || "Omni Bidder",
+          lastBidTimestamp: serverTimestamp()
+        }, { merge: true });
+
+        await addDoc(collection(db, "auctions", activeAuctionData.id, "bids"), {
+          bidderUid: currentUser.uid,
+          bidderName: currentUser.displayName || "Omni Bidder",
+          amount: newAmount,
+          createdAt: serverTimestamp()
+        });
+      } catch (err) {
+        alert("Failed to submit bid.");
+      }
+    };
+
+    window.settleAuctionPayment = function(auctionId, finalAmount) {
+      const now = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      const timeStampStr = `${pad(now.getDate())}${pad(now.getMonth()+1)}${now.getFullYear()}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+      const authToken = window.generateScrambledAuthToken(timeStampStr, currentUser.displayName || "MEMBER", finalAmount, activeAuctionData.basePrice || 24999);
+
+      triggerRazorpayPayment(
+        finalAmount,
+        `Winning Settlement: ${activeAuctionData.title}`,
+        [{ id: activeAuctionData.id, title: activeAuctionData.title, priceNumeric: finalAmount, quantity: 1, authToken: authToken }]
+      );
+    };
+
     // --- AUTH HANDLERS ---
-    document.getElementById('signInBtn').addEventListener('click', () => {
-      signInWithPopup(auth, provider).catch(() => signInWithRedirect(auth, provider));
+    document.getElementById('signInBtn').addEventListener('click', async () => {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (err) {
+        console.warn("Popup blocked or rejected, trying redirect:", err);
+        try {
+          await signInWithRedirect(auth, provider);
+        } catch (redirErr) {
+          alert("Authentication Notice: " + redirErr.message);
+        }
+      }
     });
 
     document.getElementById('userAvatar').addEventListener('click', (e) => {
@@ -1453,220 +1813,6 @@
       if (activeProductId) renderReviewsList(currentReviewsList);
     });
 
-    // --- INLINE SVG BADGE GENERATOR (FOR CARD META ROW & DETAIL HEADER) ---
-    function renderRarityBadgeHTML(item) {
-      const rarity = (item.rarity || 'common').toLowerCase();
-      const rarityLabel = item.rarityLabel || rarity.toUpperCase();
-      const madeCount = item.madeCount || '50';
-      const futurePlan = item.futurePlan || 'Limited Runs';
-      const clickHandler = `onclick="showRarityDetails(event, '${item.title.replace(/'/g, "\\'")}', '${rarity}', '${madeCount}', '${futurePlan}')"`;
-
-      if (rarity === 'vaulted') {
-        const uid = Math.random().toString(36).substring(2, 8);
-        return `
-          <div class="rarity-badge-svg-wrap" ${clickHandler}>
-            ${getVaultedBannerSVG(uid)}
-          </div>
-        `;
-      } else if (rarity === 'legendary') {
-        const uid = Math.random().toString(36).substring(2, 8);
-        return `
-          <div class="rarity-badge-svg-wrap" ${clickHandler}>
-            ${getLegendaryBannerSVG(uid)}
-          </div>
-        `;
-      } else {
-        return `
-          <span class="rarity-badge rarity-${rarity}" ${clickHandler}>
-            ${rarityLabel}
-          </span>
-        `;
-      }
-    }
-
-    // --- STRICT CART INVENTORY CONTROLLER ---
-    window.modifyCartQuantity = function(productId, delta) {
-      const available = getAvailableStock(productId);
-      const currentInCart = cart[productId] || 0;
-      const targetQuantity = currentInCart + delta;
-      const warningEl = document.getElementById(`stock-warning-${productId}`);
-
-      if (targetQuantity > available) {
-        if (warningEl) {
-          warningEl.innerText = `⚠️ Only ${available} item${available > 1 ? 's' : ''} available in total!`;
-          warningEl.style.display = "block";
-        }
-        return;
-      }
-
-      if (warningEl) warningEl.style.display = "none";
-
-      if (targetQuantity <= 0) {
-        delete cart[productId];
-      } else {
-        cart[productId] = targetQuantity;
-      }
-
-      saveCart();
-    };
-
-    window.buyNow = function(productId) {
-      const item = projects.find(p => p.id === productId);
-      if (item && (item.isAuction || item.rarity === 'vaulted' || item.category === 'auction')) {
-        return openAuctionRoom(item.id);
-      }
-
-      const available = getAvailableStock(productId);
-      if (available <= 0) return alert('Sorry, this drop is currently out of stock.');
-
-      const currentInCart = cart[productId] || 0;
-      if (currentInCart < available) {
-        cart[productId] = currentInCart + 1;
-        saveCart();
-      }
-
-      document.getElementById('productPageView').style.display = 'none';
-      document.getElementById('shopView').style.display = 'block';
-      document.getElementById('cartDrawer').classList.add('active');
-    };
-
-    window.addToCart = function(productId) {
-      const item = projects.find(p => p.id === productId);
-      if (item && (item.isAuction || item.rarity === 'vaulted' || item.category === 'auction')) {
-        return openAuctionRoom(item.id);
-      }
-
-      const available = getAvailableStock(productId);
-      if (available <= 0) return alert('Sorry, this drop is currently out of stock.');
-
-      const currentInCart = cart[productId] || 0;
-      if (currentInCart >= available) {
-        return alert(`Maximum stock limit reached! Only ${available} available.`);
-      }
-
-      cart[productId] = currentInCart + 1;
-      saveCart();
-      document.getElementById('cartDrawer').classList.add('active');
-    };
-
-    function updateCartUI() {
-      const totalCount = getTotalCartCount();
-      document.getElementById('cartBadge').innerText = totalCount;
-
-      const cartContainer = document.getElementById('cartItems');
-      const cartKeys = Object.keys(cart);
-
-      if (cartKeys.length === 0) {
-        cartContainer.innerHTML = '<div style="color:var(--muted); font-size:0.85rem; text-align:center; padding: 2rem 0;">Your cart is empty.</div>';
-        activeCoupon = null;
-      } else {
-        let html = '';
-        cartKeys.forEach(id => {
-          const item = projects.find(p => p.id === id);
-          if (!item) return;
-
-          const qty = cart[id];
-          const available = getAvailableStock(id);
-          const priceNum = item.priceNumeric || parseInt((item.price || '').replace(/[^0-9]/g, '')) || 0;
-
-          html += `
-            <div class="cart-item">
-              <div class="cart-item-top">
-                <div style="font-weight:bold; font-size:0.85rem;">${item.title}</div>
-                <button onclick="modifyCartQuantity('${id}', -${qty})" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size:0.9rem;">✕</button>
-              </div>
-              <div class="cart-item-actions">
-                <div style="color:var(--accent-neon); font-size:0.8rem; font-family:var(--font-code);">₹${(priceNum * qty).toLocaleString('en-IN')}</div>
-                <div class="qty-stepper-wrap" style="margin:0;">
-                  <button class="qty-btn-ctrl" onclick="modifyCartQuantity('${id}', -1)">−</button>
-                  <span class="qty-display-val">${qty}</span>
-                  <button class="qty-btn-ctrl" onclick="modifyCartQuantity('${id}', 1)" ${qty >= available ? 'disabled' : ''}>+</button>
-                </div>
-              </div>
-              <div id="stock-warning-${id}" class="stock-warning" style="display:${qty >= available && available > 0 ? 'block' : 'none'};">Max stock limit (${available})</div>
-            </div>
-          `;
-        });
-        cartContainer.innerHTML = html;
-      }
-
-      const rawTotal = Object.entries(cart).reduce((sum, [id, qty]) => {
-        const item = projects.find(p => p.id === id);
-        const price = item ? (item.priceNumeric || parseInt((item.price || '').replace(/[^0-9]/g, '')) || 0) : 0;
-        return sum + (price * qty);
-      }, 0);
-
-      let discountAmount = 0;
-      if (activeCoupon) {
-        if (rawTotal >= activeCoupon.minOrderAmount) {
-          if (activeCoupon.type === 'percentage') {
-            discountAmount = Math.round((rawTotal * activeCoupon.value) / 100);
-          } else if (activeCoupon.type === 'flat') {
-            discountAmount = activeCoupon.value;
-          }
-        } else {
-          activeCoupon = null;
-        }
-      }
-
-      const finalTotal = Math.max(0, rawTotal - discountAmount);
-
-      if (discountAmount > 0) {
-        document.getElementById('cartTotal').innerHTML = `
-          <span style="text-decoration: line-through; color: var(--muted); font-size: 0.8rem; margin-right: 0.4rem;">₹${rawTotal.toLocaleString('en-IN')}</span>
-          <span>₹${finalTotal.toLocaleString('en-IN')}</span>
-        `;
-      } else {
-        document.getElementById('cartTotal').innerText = `₹${finalTotal.toLocaleString('en-IN')}`;
-      }
-    }
-
-    // Dynamic Promo Code Validator
-    document.getElementById('applyCouponBtn').addEventListener('click', async () => {
-      const inputCode = document.getElementById('couponInput').value.trim().toUpperCase();
-      if (!inputCode) return alert('Please enter a promo code.');
-
-      try {
-        const res = await fetch('./coupons.json?t=' + Date.now());
-        const couponList = await res.json();
-
-        const coupon = couponList.find(c => c.code.toUpperCase() === inputCode);
-
-        if (!coupon) {
-          activeCoupon = null;
-          updateCartUI();
-          return alert('❌ Invalid promo code.');
-        }
-
-        const expiryDate = new Date(coupon.expiresAt);
-        if (new Date() > expiryDate) {
-          activeCoupon = null;
-          updateCartUI();
-          return alert('⏰ This promo code has expired.');
-        }
-
-        const rawTotal = Object.entries(cart).reduce((sum, [id, qty]) => {
-          const item = projects.find(p => p.id === id);
-          const price = item ? (item.priceNumeric || parseInt((item.price || '').replace(/[^0-9]/g, '')) || 0) : 0;
-          return sum + (price * qty);
-        }, 0);
-
-        if (rawTotal < coupon.minOrderAmount) {
-          activeCoupon = null;
-          updateCartUI();
-          return alert(`⚠️ Minimum order amount of ₹${coupon.minOrderAmount} required to use this code.`);
-        }
-
-        activeCoupon = coupon;
-        alert(`🎉 Promo code ${coupon.code} applied: ${coupon.description || 'Discount activated!'}`);
-        updateCartUI();
-
-      } catch (err) {
-        console.error('Error reading coupons.json:', err);
-        alert('Unable to load promo codes. Please try again.');
-      }
-    });
-
     // --- CATALOG LOADER ---
     async function initCatalog() {
       try {
@@ -1674,6 +1820,7 @@
         if (!res.ok) throw new Error("Catalog fetch status not ok");
         const rawProjects = await res.json();
 
+        // Defensive normalization to safely handle typos like 'lille', 'slock', 'crafl'
         projects = rawProjects.map(item => ({
           id: item.id || `drop-${Math.random().toString(36).substr(2, 6)}`,
           title: item.title || item.lille || "Omnimade Hardware Drop",
@@ -1694,6 +1841,7 @@
           downloadUrl: item.downloadUrl || null
         }));
 
+        // Sync with Firestore Inventory
         for (const item of projects) {
           try {
             const docRef = doc(db, "inventory", item.id);
