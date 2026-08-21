@@ -19,7 +19,8 @@
     "rarity": "uncommon",
     "rarityLabel": "Uncommon",
     "madeCount": "150",
-    "futurePlan": "Active Batch Production"
+    "futurePlan": "Active Batch Production",
+    "isAuction": false
   },
   {
     "id": "portronics-toad-one",
@@ -38,7 +39,8 @@
     "rarity": "common",
     "rarityLabel": "Common",
     "madeCount": "500",
-    "futurePlan": "Continuous Run"
+    "futurePlan": "Continuous Run",
+    "isAuction": false
   },
   {
     "id": "prada-water-bottle",
@@ -57,7 +59,8 @@
     "rarity": "legendary",
     "rarityLabel": "Legendary",
     "madeCount": "25",
-    "futurePlan": "Never to be made again (Vaulted)"
+    "futurePlan": "Never to be made again (Vaulted)",
+    "isAuction": false
   },
   {
     "id": "stanley-5m-tape",
@@ -76,12 +79,13 @@
     "rarity": "rare",
     "rarityLabel": "Rare Drop",
     "madeCount": "75",
-    "futurePlan": "Limited Runs Every Quarter"
+    "futurePlan": "Limited Runs Every Quarter",
+    "isAuction": false
   },
   {
     "id": "vaulted-core-01",
     "title": "Omni Core Handheld [1 of 1 Public Unit]",
-    "category": "craft",
+    "category": "auction",
     "badge": "VAULTED ARCHIVE",
     "price": "₹24,999",
     "priceNumeric": 24999,
@@ -96,6 +100,7 @@
     "rarity": "vaulted",
     "rarityLabel": "Vaulted // 1 of 1",
     "madeCount": "2 (1 Archive / 1 Public)",
-    "futurePlan": "Never to be made again (Permanent Vault)"
+    "futurePlan": "Never to be made again (Permanent Vault)",
+    "isAuction": true
   }
 ]
