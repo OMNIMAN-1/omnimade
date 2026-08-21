@@ -649,7 +649,7 @@
     footer { text-align: center; padding: 2rem; border-top: 1px solid var(--card-border); color: var(--muted); font-size: 0.8rem; font-family: var(--font-code); }
 
     /* Mobile Viewport Adaptation */
-    @media (max-width: 768px) {
+    @media (max-width: 640px) {
       nav {
         padding: 0.75rem 1rem;
         gap: 0.5rem;
@@ -678,7 +678,7 @@
       }
       .user-menu {
         right: 0;
-        width: 240px;
+        width: 230px;
       }
       .cart-drawer {
         width: 100%;
@@ -717,18 +717,14 @@
           <span class="user-name" id="userName">User Name</span>
           <span class="user-email" id="userEmail">user@gmail.com</span>
           
-          <button class="menu-item-btn" id="openVerifyBtn">
-            <span>🛡️</span> Verify ID &amp; Provenance
-          </button>
-          <button class="menu-item-btn" id="openCodeVaultBtn">
-            <span>🔐</span> My Digital Code Locker
-          </button>
           <button class="menu-item-btn" id="openOrdersBtn">
             <span>📦</span> My Orders &amp; Receipts
           </button>
+          
           <button class="menu-item-btn" id="openTrackBtn">
             <span>🚚</span> Track Shipment
           </button>
+          
           <button class="menu-item-btn" id="openSupportBtn">
             <span>💬</span> Support &amp; Community
           </button>
@@ -753,7 +749,7 @@
     <section class="hero">
       <span class="hero-tag">// HARDWARE &amp; AUTOMATION LAB</span>
       <h1>CRAFTED HARDWARE.<br>CUSTOM CODE DROPS.</h1>
-      <p>Custom builds, hardware automation kits, and source-available code drops.</p>
+      <p>Custom builds, hardware automation kits, and open-source scripts.</p>
     </section>
 
     <main class="section-container">
@@ -762,7 +758,6 @@
           <button class="filter-btn active" data-filter="all">ALL</button>
           <button class="filter-btn" data-filter="craft">HARDWARE DROPS</button>
           <button class="filter-btn" data-filter="code">SCRIPTS &amp; SCHEMATICS</button>
-          <button class="filter-btn" data-filter="auction" style="color: #ff2a4b; font-weight: 700;">⚡ LIVE AUCTION ARENA</button>
         </div>
       </div>
 
@@ -823,77 +818,6 @@
     </div>
   </div>
 
-  <!-- VIEW 3: LIVE VAULTED AUCTION ARENA -->
-  <div id="auctionView" style="display:none; max-width:1150px; margin:0 auto; padding:2rem 1.5rem 5rem;">
-    <button class="back-btn" onclick="showShopView()">&larr; BACK TO SHOP</button>
-
-    <div style="display:grid; grid-template-columns:1.15fr 1fr; gap:2.5rem; align-items:start;">
-      <!-- Left Showcase -->
-      <div style="background:#080c14; border:1px solid var(--card-border); border-radius:16px; padding:1.5rem;">
-        <div id="auctionBannerSlot" style="margin-bottom:1rem; cursor:pointer;"></div>
-        <img id="auctionItemImg" src="" style="width:100%; height:320px; object-fit:contain; border-radius:8px; background:#020001; margin-bottom:1rem;" />
-        <h2 id="auctionTitle" style="font-family:var(--font-code); font-size:1.4rem;"></h2>
-        <p id="auctionDesc" style="color:var(--muted); font-size:0.9rem; line-height:1.5; margin-top:0.5rem;"></p>
-        
-        <div style="margin-top:1.25rem; padding:0.85rem; background:rgba(255,255,255,0.02); border:1px solid var(--card-border); border-radius:8px; font-size:0.8rem; font-family:var(--font-code); line-height:1.6;">
-          <div style="color:#d4af37; font-weight:700;">📦 ROYAL PRESENTATION DOSSIER INCLUDED:</div>
-          <div style="color:var(--muted);">Custom carved wooden display case • 0.8mm Laser-engraved metal certificate card • Dual-depth wax-sealed royal parchment dossier.</div>
-        </div>
-      </div>
-
-      <!-- Right Bidding Terminal -->
-      <div style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:1.75rem; display:flex; flex-direction:column; gap:1.25rem;">
-        
-        <!-- Admin Auction Control Panel -->
-        <div id="adminAuctionBar" style="display:none; background:rgba(212,175,55,0.1); border:1px solid #d4af37; border-radius:8px; padding:0.75rem; font-family:var(--font-code); font-size:0.75rem;">
-          <div style="font-weight:800; color:#d4af37; margin-bottom:0.4rem;">⚡ ADMIN AUCTION CONDUCTOR</div>
-          <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
-            <button class="btn-glow" style="padding:0.3rem 0.6rem; font-size:0.7rem; background:#22c55e; color:#000;" onclick="adminStartAuction()">START AUCTION</button>
-            <button class="btn-glow" style="padding:0.3rem 0.6rem; font-size:0.7rem; background:#eab308; color:#000;" onclick="adminAddAuctionTime(120)">+2 MINS</button>
-            <button class="btn-glow" style="padding:0.3rem 0.6rem; font-size:0.7rem; background:#ef4444; color:#fff;" onclick="adminEndAuction()">END &amp; CALL WINNER</button>
-          </div>
-        </div>
-
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--card-border); padding-bottom:1rem;">
-          <span class="tag" style="background:rgba(239,68,68,0.15); color:#ef4444;" id="auctionLiveBadge">🔴 LIVE VAULT AUCTION</span>
-          <div style="font-family:var(--font-code); font-size:0.85rem; color:var(--accent-neon);">
-            ENDS IN: <span id="auctionTimer" style="font-weight:800; color:#fff;">--:--:--</span>
-          </div>
-        </div>
-
-        <div style="text-align:center; padding:1.25rem; background:#04060a; border:1px solid var(--card-border); border-radius:10px;">
-          <div style="font-family:var(--font-code); font-size:0.75rem; color:var(--muted); letter-spacing:1px;">CURRENT HIGHEST BID</div>
-          <div id="highestBidDisplay" style="font-family:var(--font-code); font-size:2.4rem; font-weight:800; color:var(--accent-neon); margin:0.35rem 0;">₹0</div>
-          <div id="highestBidderName" style="font-family:var(--font-code); font-size:0.85rem; color:#d4af37;">Reserve Open</div>
-        </div>
-
-        <div>
-          <div style="font-family:var(--font-code); font-size:0.75rem; color:var(--muted); margin-bottom:0.4rem;">LIVE BID LEDGER</div>
-          <div id="bidHistoryContainer" style="height:150px; overflow-y:auto; background:#020001; border:1px solid var(--card-border); border-radius:8px; padding:0.5rem; display:flex; flex-direction:column; gap:0.4rem;"></div>
-        </div>
-
-        <!-- Injected Bid Action Controls based on User Auth -->
-        <div id="bidActionArea"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PROVENANCE & DYNAMIC SCRAMBLE VERIFICATION MODAL -->
-  <div id="verifyModal" class="popup-modal">
-    <div class="popup-modal-content" style="max-width:560px;">
-      <h3 style="color:var(--accent-neon); font-family:var(--font-code);">🛡️ Cryptographic Provenance Terminal</h3>
-      <p style="font-size:0.85rem; color:var(--muted); margin-bottom:1rem;">
-        Enter the stamped scrambled authentication token from the wax-sealed metal card:
-      </p>
-      <div style="display:flex; flex-direction:column; gap:0.75rem;">
-        <input type="text" id="verifyScrambleInput" class="review-input" placeholder="e.g. OMNI-AUTH-272050882002OM6N1IK2I5N7G17658P0M3" style="text-transform:uppercase;">
-        <button class="btn-glow" id="verifySubmitBtn" style="width:100%;">DECODE &amp; VERIFY PROVENANCE</button>
-      </div>
-      <div id="verifyResultArea" style="margin-top:1rem;"></div>
-      <button class="close-modal-btn" id="closeVerifyBtn">CLOSE</button>
-    </div>
-  </div>
-
   <!-- INTERACTIVE RARITY POPUP MODAL (SHOWS FULL-SIZE BANNER & SPECS) -->
   <div id="rarityModal" class="popup-modal">
     <div class="popup-modal-content" style="text-align:center;">
@@ -903,16 +827,6 @@
       <p id="modalFuture">Future Runs: None</p>
       <p id="modalStatus" class="status-highlight"></p>
       <button class="close-modal-btn" id="closeRarityBtn">CLOSE</button>
-    </div>
-  </div>
-
-  <!-- DIGITAL CODE LOCKER MODAL -->
-  <div id="codeVaultModal" class="popup-modal">
-    <div class="popup-modal-content" style="max-height:85vh; display:flex; flex-direction:column; max-width:550px;">
-      <h3 style="font-family:var(--font-code); color:var(--accent-neon);">🔐 My Digital Code Locker</h3>
-      <p style="color:var(--muted); font-size:0.8rem; margin-bottom:1rem;">Your purchased firmware, scripts, and CAD schematics tied to your Google account.</p>
-      <div id="codeVaultItems" style="overflow-y:auto; display:flex; flex-direction:column; gap:0.75rem;"></div>
-      <button class="close-modal-btn" id="closeCodeVaultBtn">CLOSE</button>
     </div>
   </div>
 
@@ -1020,7 +934,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
 
     let currentUser = null;
     let isUserAdmin = false;
@@ -1031,12 +944,6 @@
     let currentReviewsList = [];
     let activeCoupon = null;
     let liveStockMap = {};
-
-    // Live Auction State
-    let currentAuctionUnsub = null;
-    let currentBidsUnsub = null;
-    let activeAuctionData = null;
-    let timerInterval = null;
 
     // --- Strict Inventory-Bound Cart State ---
     let cart = JSON.parse(localStorage.getItem('omnimade_cart_map')) || {};
@@ -1057,31 +964,6 @@
       const totalLive = typeof liveStockMap[productId] === 'number' ? liveStockMap[productId] : (item.stock ?? 50);
       return Math.max(0, totalLive);
     }
-
-    // --- Dynamic Transposition Cipher ---
-    window.generateScrambledAuthToken = function(timestampStr, username, bidPrice, basePrice) {
-      const diff = Math.max(0, bidPrice - basePrice);
-      const raw = `${timestampStr}${bidPrice}${username.toUpperCase().replace(/\s+/g, '')}${diff}`;
-      let scrambled = "";
-      const len = raw.length;
-      for (let i = 0; i < Math.ceil(len / 2); i++) {
-        scrambled += raw[i];
-        if (len - 1 - i > i) scrambled += raw[len - 1 - i];
-      }
-      return `OMNI-AUTH-${scrambled}`;
-    };
-
-    window.decodeScrambledAuthToken = function(scrambledToken) {
-      const clean = scrambledToken.replace('OMNI-AUTH-', '').trim();
-      const len = clean.length;
-      const left = [];
-      const right = [];
-      for (let i = 0; i < len; i++) {
-        if (i % 2 === 0) left.push(clean[i]);
-        else right.push(clean[i]);
-      }
-      return left.join('') + right.reverse().join('');
-    };
 
     // --- THEME ENGINE ---
     function applyTheme(preference) {
@@ -1145,7 +1027,7 @@
               <stop offset="0%" stop-color="#fff4b8" /><stop offset="25%" stop-color="#d4af37" /><stop offset="50%" stop-color="#aa820a" /><stop offset="75%" stop-color="#e5c158" /><stop offset="100%" stop-color="#5c4300" />
             </linearGradient>
             <radialGradient id="v_recess_${uid}" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#ff002b" stop-opacity="1" /><stop offset="35%" stop-color="#b30019" stop-opacity="0.95" /><stop offset="70%" stop-color="#4d000a" stop-opacity="0.95" /><stop offset="100%" stop-color="#050001" stop-opacity="1" />
+              <stop offset="0%" stop-color="#ff002b" stop-opacity="1" /><stop offset="35%" stop-color="#b30019" stop-opacity="0.95" /><stop offset="70%" stop-color="#4d000a" stop-opacity="0.95" /><stop offset="100%" stop-color="#050001" />
             </radialGradient>
             <radialGradient id="v_aura_${uid}" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stop-color="#ff002b" stop-opacity="1" /><stop offset="30%" stop-color="#cc001e" stop-opacity="0.85" /><stop offset="60%" stop-color="#66000c" stop-opacity="0.4" /><stop offset="100%" stop-color="#ff002b" stop-opacity="0" />
@@ -1410,6 +1292,50 @@
       document.getElementById('ordersModal').style.display = 'none';
     };
 
+    // --- AUTH HANDLERS ---
+    document.getElementById('signInBtn').addEventListener('click', () => {
+      signInWithPopup(auth, provider).catch(() => signInWithRedirect(auth, provider));
+    });
+
+    document.getElementById('userAvatar').addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('userMenu').classList.toggle('active');
+    });
+
+    document.addEventListener('click', () => document.getElementById('userMenu').classList.remove('active'));
+
+    document.getElementById('signOutBtn').addEventListener('click', () => {
+      signOut(auth).then(() => {
+        document.getElementById('userMenu').classList.remove('active');
+        isUserAdmin = false;
+      });
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      if (user) {
+        document.getElementById('signInBtn').style.display = 'none';
+        document.getElementById('profileContainer').style.display = 'block';
+        document.getElementById('userAvatar').src = user.photoURL || 'https://lh3.googleusercontent.com/a/default-user';
+        document.getElementById('userName').innerText = user.displayName || 'Subscriber';
+        document.getElementById('userEmail').innerText = user.email || '';
+        document.getElementById('authError').style.display = 'none';
+
+        try {
+          const adminDoc = await getDoc(doc(db, "admins", user.email));
+          isUserAdmin = adminDoc.exists();
+        } catch (e) {
+          isUserAdmin = false;
+        }
+      } else {
+        document.getElementById('signInBtn').style.display = 'block';
+        document.getElementById('profileContainer').style.display = 'none';
+        isUserAdmin = false;
+      }
+
+      if (activeProductId) renderReviewsList(currentReviewsList);
+    });
+
     // --- INLINE SVG BADGE GENERATOR (FOR CARD META ROW & DETAIL HEADER) ---
     function renderRarityBadgeHTML(item) {
       const rarity = (item.rarity || 'common').toLowerCase();
@@ -1468,11 +1394,6 @@
     };
 
     window.buyNow = function(productId) {
-      const item = projects.find(p => p.id === productId);
-      if (item && (item.isAuction || item.rarity === 'vaulted' || item.category === 'auction')) {
-        return openAuctionRoom(item.id);
-      }
-
       const available = getAvailableStock(productId);
       if (available <= 0) return alert('Sorry, this drop is currently out of stock.');
 
@@ -1488,11 +1409,6 @@
     };
 
     window.addToCart = function(productId) {
-      const item = projects.find(p => p.id === productId);
-      if (item && (item.isAuction || item.rarity === 'vaulted' || item.category === 'auction')) {
-        return openAuctionRoom(item.id);
-      }
-
       const available = getAvailableStock(productId);
       if (available <= 0) return alert('Sorry, this drop is currently out of stock.');
 
@@ -1624,430 +1540,11 @@
       }
     });
 
-    // --- PROVENANCE & AUTHENTICITY TERMINAL ---
-    document.getElementById('openVerifyBtn').onclick = () => {
-      document.getElementById('userMenu').classList.remove('active');
-      document.getElementById('verifyModal').style.display = 'flex';
-      document.getElementById('verifyResultArea').innerHTML = '';
-      document.getElementById('verifyScrambleInput').value = '';
-    };
-
-    document.getElementById('closeVerifyBtn').onclick = () => {
-      document.getElementById('verifyModal').style.display = 'none';
-    };
-
-    document.getElementById('verifySubmitBtn').onclick = async () => {
-      const token = document.getElementById('verifyScrambleInput').value.trim().toUpperCase();
-      const resultArea = document.getElementById('verifyResultArea');
-      if (!token) return alert("Please enter the scrambled token.");
-
-      const decoded = window.decodeScrambledAuthToken(token);
-      resultArea.innerHTML = `<div style="color:var(--muted); font-family:var(--font-code); text-align:center;">Deciphering cryptographic token stream...</div>`;
-
-      try {
-        const q = query(collection(db, "orders"), where("authToken", "==", token));
-        const snap = await getDocs(q);
-
-        if (!snap.empty) {
-          const data = snap.docs[0].data();
-          resultArea.innerHTML = `
-            <div style="background:rgba(34,197,94,0.08); border:1px solid #22c55e; border-radius:8px; padding:1rem; font-family:var(--font-code); font-size:0.8rem;">
-              <div style="color:#22c55e; font-weight:bold; margin-bottom:0.5rem;">✅ CRYPTOGRAPHIC SIGNATURE MATCHED</div>
-              <div><strong>Decoded Signature:</strong> ${decoded}</div>
-              <div><strong>Owner:</strong> ${data.customerName}</div>
-              <div><strong>Description:</strong> ${data.orderDescription}</div>
-              <div><strong>Settled Price:</strong> ₹${data.amountPaid}</div>
-            </div>
-          `;
-        } else {
-          resultArea.innerHTML = `
-            <div style="background:rgba(239,68,68,0.08); border:1px solid #ef4444; border-radius:8px; padding:1rem; font-family:var(--font-code); font-size:0.8rem; text-align:center;">
-              <div style="color:#ef4444; font-weight:bold;">❌ AUTHENTICATION FAILED</div>
-              <div style="color:var(--muted); margin-top:0.3rem;">Decoded Stream: <code>${decoded}</code> (Not found in physical provenance records)</div>
-            </div>
-          `;
-        }
-      } catch (err) {
-        resultArea.innerHTML = `<div style="color:var(--danger); font-size:0.8rem; text-align:center;">Error contacting verification ledger.</div>`;
-      }
-    };
-
-    // --- DIGITAL CODE LOCKER CONTROLLER ---
-    window.triggerDirectDownload = function(fileUrl, fileName) {
-      const anchor = document.createElement('a');
-      anchor.href = fileUrl;
-      anchor.download = fileName || 'Omnimade_Source_Package.zip';
-      document.body.appendChild(anchor);
-      anchor.click();
-      document.body.removeChild(anchor);
-    };
-
-    document.getElementById('openCodeVaultBtn').onclick = () => {
-      document.getElementById('userMenu').classList.remove('active');
-      document.getElementById('codeVaultModal').style.display = 'flex';
-      loadUserCodeLocker();
-    };
-
-    document.getElementById('closeCodeVaultBtn').onclick = () => {
-      document.getElementById('codeVaultModal').style.display = 'none';
-    };
-
-    async function loadUserCodeLocker() {
-      const container = document.getElementById('codeVaultItems');
-      if (!currentUser) {
-        container.innerHTML = `<div style="color:var(--muted); text-align:center; padding:1.5rem;">Please sign in to view your purchased digital drops.</div>`;
-        return;
-      }
-
-      try {
-        const q = query(collection(db, "orders"), where("userId", "==", currentUser.uid));
-        const snapshot = await getDocs(q);
-
-        if (snapshot.empty) {
-          container.innerHTML = `<div style="color:var(--muted); text-align:center; padding:1.5rem;">No digital drops purchased yet.</div>`;
-          return;
-        }
-
-        let html = '';
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
-          const items = data.items || [];
-          
-          items.forEach(item => {
-            if (item.category === 'code' || item.downloadUrl) {
-              const fileLink = item.downloadUrl || "https://github.com/mohd-shahid-kohri";
-              html += `
-                <div style="background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:8px; padding:0.85rem; display:flex; justify-content:space-between; align-items:center;">
-                  <div>
-                    <div style="font-weight:700; font-size:0.9rem;">${item.title}</div>
-                    <div style="font-family:var(--font-code); font-size:0.7rem; color:var(--accent-neon); margin-top:0.2rem;">LICENSE: OMNI-LIFETIME-ACTIVE</div>
-                  </div>
-                  <button class="btn-glow" style="padding:0.4rem 0.8rem; font-size:0.75rem;" onclick="triggerDirectDownload('${fileLink}', '${item.title.replace(/\s+/g, '_')}_Source.zip')">
-                    ⬇ DOWNLOAD ZIP
-                  </button>
-                </div>
-              `;
-            }
-          });
-        });
-
-        container.innerHTML = html || `<div style="color:var(--muted); text-align:center; padding:1.5rem;">No digital script packages in your order history.</div>`;
-      } catch (err) {
-        console.error(err);
-        container.innerHTML = `<div style="color:var(--danger); text-align:center; padding:1.5rem;">Failed to load code vault.</div>`;
-      }
-    }
-
-    // --- LIVE AUCTION ARENA CONTROLLER ---
-    window.openAuctionRoom = function(auctionId) {
-      document.getElementById('shopView').style.display = 'none';
-      document.getElementById('productPageView').style.display = 'none';
-      document.getElementById('auctionView').style.display = 'block';
-      window.scrollTo(0, 0);
-
-      listenToLiveAuction(auctionId);
-    };
-
-    function listenToLiveAuction(auctionId) {
-      if (currentAuctionUnsub) currentAuctionUnsub();
-      if (currentBidsUnsub) currentBidsUnsub();
-      if (timerInterval) clearInterval(timerInterval);
-
-      const auctionRef = doc(db, "auctions", auctionId);
-      
-      currentAuctionUnsub = onSnapshot(auctionRef, (docSnap) => {
-        if (!docSnap.exists()) {
-          const fallbackAuction = {
-            id: auctionId,
-            title: "Omni Core Handheld [1 of 1 Public Unit]",
-            rarity: "vaulted",
-            basePrice: 24999,
-            currentBid: 24999,
-            minBidIncrement: 500,
-            status: "live",
-            image: "./Assets/VAULTED_UNIT.jpg",
-            endsAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-            description: "Ultra-complex handcrafted build. Unit 02/02. Housed in a custom carved wooden presentation case with wax-sealed metal authentication dossier."
-          };
-          activeAuctionData = fallbackAuction;
-          renderAuctionDetails(fallbackAuction);
-          return;
-        }
-        activeAuctionData = { id: docSnap.id, ...docSnap.data() };
-        renderAuctionDetails(activeAuctionData);
-      });
-
-      const bidsQuery = query(collection(db, "auctions", auctionId, "bids"));
-      currentBidsUnsub = onSnapshot(bidsQuery, (snapshot) => {
-        const bids = [];
-        snapshot.forEach(d => bids.push(d.data()));
-        bids.sort((a, b) => b.amount - a.amount);
-        renderBidHistory(bids);
-      });
-    }
-
-    function renderAuctionDetails(data) {
-      const bannerSlot = document.getElementById('auctionBannerSlot');
-      bannerSlot.innerHTML = getVaultedBannerSVG('auction_live_hdr');
-      bannerSlot.onclick = (e) => showRarityDetails(e, data.title, data.rarity, "2 Total", "Permanent Vault");
-
-      document.getElementById('auctionTitle').innerText = data.title;
-      document.getElementById('auctionDesc').innerText = data.description || "Limited edition hardware drop.";
-      document.getElementById('auctionItemImg').src = data.image || "./Assets/VAULTED_UNIT.jpg";
-      document.getElementById('highestBidDisplay').innerText = `₹${data.currentBid.toLocaleString('en-IN')}`;
-      document.getElementById('highestBidderName').innerText = data.highestBidderName 
-        ? `Highest Bidder: ${data.highestBidderName}` 
-        : "Starting Reserve: Available";
-
-      const adminBar = document.getElementById('adminAuctionBar');
-      if (adminBar) adminBar.style.display = isUserAdmin ? 'block' : 'none';
-
-      if (timerInterval) clearInterval(timerInterval);
-      const timerEl = document.getElementById('auctionTimer');
-
-      timerInterval = setInterval(() => {
-        if (!data.endsAt || data.status === 'ended') {
-          timerEl.innerText = "CONCLUDED";
-          return;
-        }
-
-        const diff = new Date(data.endsAt).getTime() - Date.now();
-        if (diff <= 0) {
-          timerEl.innerText = "00:00:00";
-          clearInterval(timerInterval);
-        } else {
-          const hours = Math.floor(diff / (1000 * 60 * 60));
-          const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          const secs = Math.floor((diff % (1000 * 60)) / 1000);
-          timerEl.innerText = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-        }
-      }, 1000);
-
-      renderBidActionBox(data);
-    }
-
-    function renderBidHistory(bids) {
-      const container = document.getElementById('bidHistoryContainer');
-      if (!bids.length) {
-        container.innerHTML = `<div style="color:var(--muted); font-size:0.75rem; text-align:center; padding:1rem;">Waiting for the opening bid...</div>`;
-        return;
-      }
-      container.innerHTML = bids.map(b => `
-        <div style="display:flex; justify-content:space-between; font-family:var(--font-code); font-size:0.75rem; padding:0.35rem 0.5rem; background:rgba(255,255,255,0.02); border-radius:4px;">
-          <span style="color:#d4af37;">${b.bidderName}</span>
-          <span style="color:var(--accent-neon); font-weight:700;">₹${b.amount.toLocaleString('en-IN')}</span>
-        </div>
-      `).join('');
-    }
-
-    function renderBidActionBox(auction) {
-      const container = document.getElementById('bidActionArea');
-      
-      if (auction.status === 'ended') {
-        const isWinner = currentUser && currentUser.uid === auction.highestBidderUid;
-        if (isWinner && !auction.winnerPaid) {
-          container.innerHTML = `
-            <div style="text-align:center; padding:0.85rem; background:rgba(34,197,94,0.1); border:1px solid #22c55e; border-radius:8px;">
-              <div style="font-weight:800; color:#22c55e; font-family:var(--font-code);">🏆 YOU WON THIS AUCTION!</div>
-              <p style="font-size:0.8rem; color:var(--muted); margin:0.3rem 0 0.8rem;">Complete settlement to generate your cryptographic provenance dossier.</p>
-              <button class="btn-glow" style="width:100%; background:#22c55e; color:#000;" onclick="settleAuctionPayment('${auction.id}', ${auction.currentBid})">COMPLETE PAYMENT NOW (₹${auction.currentBid})</button>
-            </div>
-          `;
-        } else {
-          container.innerHTML = `
-            <div style="text-align:center; padding:1rem; background:rgba(255,255,255,0.03); border:1px solid var(--card-border); border-radius:8px; font-family:var(--font-code); color:var(--muted);">
-              🔒 AUCTION CONCLUDED • FINAL SETTLEMENT IN PROGRESS
-            </div>
-          `;
-        }
-        return;
-      }
-
-      if (!currentUser) {
-        container.innerHTML = `
-          <div style="text-align:center; padding:1rem; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.3); border-radius:8px;">
-            <div style="font-size:0.85rem; font-family:var(--font-code); color:#ff8ca3; margin-bottom:0.6rem;">🔒 You must be signed in to place a bid.</div>
-            <button class="btn-glow" style="width:100%;" onclick="signInWithPopup(auth, provider)">Sign In With Google To Bid</button>
-          </div>
-        `;
-        return;
-      }
-
-      const nextMinBid = auction.currentBid + (auction.minBidIncrement || 500);
-      container.innerHTML = `
-        <div style="display:flex; flex-direction:column; gap:0.6rem;">
-          <div style="display:flex; gap:0.5rem;">
-            <button class="btn-glow" style="flex:1; background:rgba(255,255,255,0.08); border:1px solid var(--card-border);" onclick="placeQuickBid(${auction.currentBid + 500})">+ ₹500</button>
-            <button class="btn-glow" style="flex:1; background:rgba(255,255,255,0.08); border:1px solid var(--card-border);" onclick="placeQuickBid(${auction.currentBid + 1000})">+ ₹1,000</button>
-            <button class="btn-glow" style="flex:1; background:rgba(255,255,255,0.08); border:1px solid var(--card-border);" onclick="placeQuickBid(${auction.currentBid + 2500})">+ ₹2,500</button>
-          </div>
-          <button class="btn-glow" style="width:100%; font-size:0.95rem; padding:0.85rem;" onclick="placeQuickBid(${nextMinBid})">
-            BID ₹${nextMinBid.toLocaleString('en-IN')} NOW
-          </button>
-        </div>
-      `;
-    }
-
-    window.adminStartAuction = async function() {
-      if (!isUserAdmin || !activeAuctionData) return;
-      try {
-        const auctionRef = doc(db, "auctions", activeAuctionData.id);
-        await updateDoc(auctionRef, {
-          status: "live",
-          endsAt: new Date(Date.now() + 60 * 60 * 1000).toISOString()
-        });
-        alert("Auction initiated for 1 hour!");
-      } catch (e) {
-        console.error(e);
-      }
-    };
-
-    window.adminAddAuctionTime = async function(seconds) {
-      if (!isUserAdmin || !activeAuctionData) return;
-      try {
-        const auctionRef = doc(db, "auctions", activeAuctionData.id);
-        const currentEnd = new Date(activeAuctionData.endsAt || Date.now()).getTime();
-        await updateDoc(auctionRef, { endsAt: new Date(currentEnd + seconds * 1000).toISOString() });
-      } catch (e) {
-        console.error(e);
-      }
-    };
-
-    window.adminEndAuction = async function() {
-      if (!isUserAdmin || !activeAuctionData) return;
-      if (confirm(`Conclude auction and award to ${activeAuctionData.highestBidderName || 'reserve'}?`)) {
-        try {
-          const auctionRef = doc(db, "auctions", activeAuctionData.id);
-          await updateDoc(auctionRef, { status: "ended", endsAt: new Date().toISOString() });
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    };
-
-    window.placeQuickBid = async function(newAmount) {
-      if (!currentUser || !activeAuctionData) return;
-      if (newAmount <= activeAuctionData.currentBid) return alert(`Bid must be higher than ₹${activeAuctionData.currentBid}`);
-
-      try {
-        const auctionRef = doc(db, "auctions", activeAuctionData.id);
-        await setDoc(auctionRef, {
-          ...activeAuctionData,
-          currentBid: newAmount,
-          highestBidderUid: currentUser.uid,
-          highestBidderName: currentUser.displayName || "Omni Bidder",
-          lastBidTimestamp: serverTimestamp()
-        }, { merge: true });
-
-        await addDoc(collection(db, "auctions", activeAuctionData.id, "bids"), {
-          bidderUid: currentUser.uid,
-          bidderName: currentUser.displayName || "Omni Bidder",
-          amount: newAmount,
-          createdAt: serverTimestamp()
-        });
-      } catch (err) {
-        alert("Failed to submit bid.");
-      }
-    };
-
-    window.settleAuctionPayment = function(auctionId, finalAmount) {
-      const now = new Date();
-      const pad = n => String(n).padStart(2, '0');
-      const timeStampStr = `${pad(now.getDate())}${pad(now.getMonth()+1)}${now.getFullYear()}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-      const authToken = window.generateScrambledAuthToken(timeStampStr, currentUser.displayName || "MEMBER", finalAmount, activeAuctionData.basePrice || 24999);
-
-      triggerRazorpayPayment(
-        finalAmount,
-        `Winning Settlement: ${activeAuctionData.title}`,
-        [{ id: activeAuctionData.id, title: activeAuctionData.title, priceNumeric: finalAmount, quantity: 1, authToken: authToken }]
-      );
-    };
-
-    // --- AUTH HANDLERS ---
-    document.getElementById('signInBtn').addEventListener('click', async () => {
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (err) {
-        console.warn("Popup blocked or rejected, trying redirect:", err);
-        try {
-          await signInWithRedirect(auth, provider);
-        } catch (redirErr) {
-          alert("Authentication Notice: " + redirErr.message);
-        }
-      }
-    });
-
-    document.getElementById('userAvatar').addEventListener('click', (e) => {
-      e.stopPropagation();
-      document.getElementById('userMenu').classList.toggle('active');
-    });
-
-    document.addEventListener('click', () => document.getElementById('userMenu').classList.remove('active'));
-
-    document.getElementById('signOutBtn').addEventListener('click', () => {
-      signOut(auth).then(() => {
-        document.getElementById('userMenu').classList.remove('active');
-        isUserAdmin = false;
-        document.getElementById('adminAuctionBar').style.display = 'none';
-      });
-    });
-
-    onAuthStateChanged(auth, async (user) => {
-      currentUser = user;
-      if (user) {
-        document.getElementById('signInBtn').style.display = 'none';
-        document.getElementById('profileContainer').style.display = 'block';
-        document.getElementById('userAvatar').src = user.photoURL || 'https://lh3.googleusercontent.com/a/default-user';
-        document.getElementById('userName').innerText = user.displayName || 'Subscriber';
-        document.getElementById('userEmail').innerText = user.email || '';
-        document.getElementById('authError').style.display = 'none';
-
-        try {
-          const adminDoc = await getDoc(doc(db, "admins", user.email));
-          isUserAdmin = adminDoc.exists() || user.email === "gamerindian840@gmail.com";
-        } catch (e) {
-          isUserAdmin = (user.email === "gamerindian840@gmail.com");
-        }
-      } else {
-        document.getElementById('signInBtn').style.display = 'block';
-        document.getElementById('profileContainer').style.display = 'none';
-        isUserAdmin = false;
-      }
-
-      const adminBar = document.getElementById('adminAuctionBar');
-      if (adminBar) adminBar.style.display = isUserAdmin ? 'block' : 'none';
-
-      if (activeAuctionData) renderBidActionBox(activeAuctionData);
-      if (activeProductId) renderReviewsList(currentReviewsList);
-    });
-
     // --- CATALOG LOADER ---
     async function initCatalog() {
       try {
         const res = await fetch('./projects.json?t=' + Date.now());
-        if (!res.ok) throw new Error("Catalog fetch status not ok");
-        const rawProjects = await res.json();
-
-        // Defensive normalization to safely handle typos like 'lille', 'slock', 'crafl'
-        projects = rawProjects.map(item => ({
-          id: item.id || `drop-${Math.random().toString(36).substr(2, 6)}`,
-          title: item.title || item.lille || "Omnimade Hardware Drop",
-          category: (item.category || item.crafl || "craft").toLowerCase().trim(),
-          badge: item.badge || "DROP",
-          price: item.price || "₹0",
-          priceNumeric: item.priceNumeric || parseInt((item.price || "0").replace(/[^0-9]/g, '')) || 0,
-          stock: typeof item.stock === 'number' ? item.stock : (typeof item.slock === 'number' ? item.slock : 50),
-          image: item.image || "./Assets/BOSE HEADPHONES.jpg",
-          gallery: item.gallery || [item.image || "./Assets/BOSE HEADPHONES.jpg"],
-          description: item.description || "Precision engineered hardware drop.",
-          fullDescription: item.fullDescription || item.description || "",
-          rarity: (item.rarity || "common").toLowerCase().trim(),
-          rarityLabel: item.rarityLabel || item.rarity || "Common",
-          madeCount: item.madeCount || "50",
-          futurePlan: item.futurePlan || "Active Run",
-          isAuction: item.isAuction || (item.category === "auction") || (item.rarity === "vaulted"),
-          downloadUrl: item.downloadUrl || null
-        }));
+        projects = await res.json();
 
         // Sync with Firestore Inventory
         for (const item of projects) {
@@ -2075,22 +1572,13 @@
     }
 
     function renderGrid(items) {
-      const grid = document.getElementById('grid');
-      if (!items || !items.length) {
-        grid.innerHTML = `<div style="color:var(--muted); grid-column: 1/-1; text-align:center; padding:3rem;">No drops found in this category.</div>`;
-        return;
-      }
-
-      grid.innerHTML = items.map(item => {
+      document.getElementById('grid').innerHTML = items.map(item => {
         const stockLeft = typeof liveStockMap[item.id] === 'number' ? liveStockMap[item.id] : (item.stock ?? 50);
         const isOutOfStock = stockLeft <= 0;
         const isLowStock = stockLeft > 0 && stockLeft < 10;
-        const isAuction = item.isAuction || item.rarity === 'vaulted' || item.category === 'auction';
 
         let stockNotice = '';
-        if (isAuction) {
-          stockNotice = `<div class="stock-warning" style="color:#d4af37;">⚡ LIVE BIDDING ARENA ACTIVE</div>`;
-        } else if (isOutOfStock) {
+        if (isOutOfStock) {
           stockNotice = `<div class="stock-warning">🔴 OUT OF STOCK</div>`;
         } else if (isLowStock) {
           stockNotice = `<div class="stock-warning">⚠️ ONLY ${stockLeft} UNITS LEFT!</div>`;
@@ -2098,25 +1586,21 @@
 
         return `
         <div class="card">
-          <div class="card-thumb-wrap" onclick="${isAuction ? `openAuctionRoom('${item.id}')` : `openProductPage('${item.id}')`}">
-            <img src="${item.image}" class="card-thumb" alt="${item.title}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\'%3E%3Crect width=\\'100\\' height=\\'100\\' fill=\\'%23080c14\\'/ %3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' fill=\\'%233b82f6\\' font-family=\\'monospace\\' font-size=\\'10\\' text-anchor=\\'middle\\' dy=\\'.3em\\'%3EOMNIMADE%3C/text%3E%3C/svg%3E'">
+          <div class="card-thumb-wrap" onclick="openProductPage('${item.id}')">
+            <img src="${item.image}" class="card-thumb" alt="${item.title}">
           </div>
           <div class="card-body">
             <div class="card-meta-row">
               <span class="tag">${item.badge || 'DROP'}</span>
               ${renderRarityBadgeHTML(item)}
             </div>
-            <h3 class="card-title" onclick="${isAuction ? `openAuctionRoom('${item.id}')` : `openProductPage('${item.id}')`}">${item.title}</h3>
+            <h3 class="card-title" onclick="openProductPage('${item.id}')">${item.title}</h3>
             <p class="card-desc">${item.description}</p>
-            <div style="font-family: var(--font-code); font-weight:700; font-size:1.1rem; color: var(--accent-neon);">${isAuction ? `Starting Reserve: ${item.price}` : item.price}</div>
+            <div style="font-family: var(--font-code); font-weight:700; font-size:1.1rem; color: var(--accent-neon);">${item.price}</div>
             ${stockNotice}
             <div class="card-actions-group">
-              ${isAuction ? `
-                <button class="btn-buy" style="background:#ff2a4b; width:100%;" onclick="openAuctionRoom('${item.id}')">⚡ ENTER AUCTION ROOM</button>
-              ` : `
-                <button class="btn-cart ${isOutOfStock ? 'btn-disabled' : ''}" onclick="addToCart('${item.id}')">${isOutOfStock ? 'OUT OF STOCK' : 'ADD TO CART'}</button>
-                <button class="btn-buy ${isOutOfStock ? 'btn-disabled' : ''}" onclick="buyNow('${item.id}')">${isOutOfStock ? 'SOLD OUT' : 'BUY NOW'}</button>
-              `}
+              <button class="btn-cart ${isOutOfStock ? 'btn-disabled' : ''}" onclick="addToCart('${item.id}')">${isOutOfStock ? 'OUT OF STOCK' : 'ADD TO CART'}</button>
+              <button class="btn-buy ${isOutOfStock ? 'btn-disabled' : ''}" onclick="buyNow('${item.id}')">${isOutOfStock ? 'SOLD OUT' : 'BUY NOW'}</button>
             </div>
           </div>
         </div>
@@ -2169,7 +1653,7 @@
 
       thumbsContainer.innerHTML = galleryList.map((imgUrl, idx) => `
         <button class="thumb-btn ${idx === 0 ? 'active' : ''}" onclick="switchMainImage('${imgUrl}', this)">
-          <img src="${imgUrl}" alt="Angle ${idx + 1}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\'%3E%3Crect width=\\'100\\' height=\\'100\\' fill=\\'%23080c14\\'/ %3E%3Ctext x=\\'50%25\\' y=\\'50%25\\' fill=\\'%233b82f6\\' font-family=\\'monospace\\' font-size=\\'10\\' text-anchor=\\'middle\\' dy=\\'.3em\\'%3EOMNIMADE%3C/text%3E%3C/svg%3E'">
+          <img src="${imgUrl}" alt="Angle ${idx + 1}">
         </button>
       `).join('');
 
@@ -2207,7 +1691,6 @@
       listenToReviews(id);
 
       document.getElementById('shopView').style.display = 'none';
-      document.getElementById('auctionView').style.display = 'none';
       document.getElementById('productPageView').style.display = 'block';
       window.scrollTo(0, 0);
     };
@@ -2220,11 +1703,9 @@
 
     function showShopView() {
       document.getElementById('productPageView').style.display = 'none';
-      document.getElementById('auctionView').style.display = 'none';
       document.getElementById('shopView').style.display = 'block';
       window.scrollTo(0, 0);
     }
-    window.showShopView = showShopView;
 
     document.getElementById('backToShopBtn').addEventListener('click', showShopView);
     document.getElementById('navHomeLink').addEventListener('click', showShopView);
@@ -2245,7 +1726,6 @@
         "description": orderDescription,
         "handler": async function (response) {
           try {
-            const token = orderItemsArray[0]?.authToken || `OMNI-STD-${Date.now()}`;
             await addDoc(collection(db, "orders"), {
               userId: currentUser.uid,
               customerName: currentUser.displayName || "Omnimade Member",
@@ -2254,7 +1734,6 @@
               orderDescription: orderDescription,
               amountPaid: amountInRupees,
               items: orderItemsArray,
-              authToken: token,
               orderStatus: "Confirmed / Synced with Shiprocket",
               createdAt: serverTimestamp()
             });
@@ -2315,8 +1794,6 @@
           title: item.title,
           price: item.price,
           priceNumeric: item.priceNumeric,
-          category: item.category,
-          downloadUrl: item.downloadUrl,
           quantity: qty
         });
       }
@@ -2466,16 +1943,8 @@
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
         const f = e.target.getAttribute('data-filter');
-        
-        if (f === 'all') {
-          renderGrid(projects);
-        } else if (f === 'auction') {
-          renderGrid(projects.filter(p => p.isAuction || p.rarity === 'vaulted' || p.category === 'auction'));
-        } else if (f === 'craft') {
-          renderGrid(projects.filter(p => (p.category === 'craft' || p.category === 'crafl' || !p.category) && !p.isAuction && p.rarity !== 'vaulted' && p.category !== 'auction'));
-        } else if (f === 'code') {
-          renderGrid(projects.filter(p => p.category === 'code'));
-        }
+        if (f === 'all') renderGrid(projects);
+        else renderGrid(projects.filter(p => p.category === f));
       });
     });
 
