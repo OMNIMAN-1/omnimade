@@ -1396,6 +1396,59 @@
     let currentReviewsList = [];
     let unsubscribeReviews = null;
 
+    // --- RAW SVG BANNER GENERATORS (VAULTED & LEGENDARY) ---
+    function getVaultedBannerSVG(uid) {
+      return `
+        <svg viewBox="0 0 540 120" width="100%" height="auto" style="overflow: visible;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <style>
+              @keyframes coreBloodyPulse_${uid} {
+                0%, 100% { transform: scale(0.92); opacity: 0.7; filter: drop-shadow(0 0 10px #7f000d) drop-shadow(0 0 24px rgba(255, 0, 43, 0.65)); }
+                50% { transform: scale(1.18); opacity: 1; filter: drop-shadow(0 0 24px #ff002b) drop-shadow(0 0 50px rgba(255, 0, 43, 1)) drop-shadow(0 0 12px #d4af37); }
+              }
+              @keyframes outerArmoredGearSpinCW_${uid} { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+              @keyframes fourSpokeLockSpinCCW_${uid} { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
+              @keyframes darkGoldLightSweep_${uid} { 0% { transform: translateX(-200%); } 60%, 100% { transform: translateX(200%); } }
+              @keyframes aggressiveTextPulse_${uid} {
+                0%, 100% { fill: #ff1e38; filter: drop-shadow(0 0 3px rgba(255, 30, 56, 0.8)); }
+                50% { fill: #ff8594; filter: drop-shadow(0 0 12px rgba(255, 0, 43, 1)) drop-shadow(0 0 20px rgba(212, 175, 55, 0.7)); }
+              }
+              .bloody_aura_${uid} { transform-origin: 270px 60px; animation: coreBloodyPulse_${uid} 2.2s infinite ease-in-out; }
+              .gear_cw_${uid} { transform-origin: 270px 60px; animation: outerArmoredGearSpinCW_${uid} 20s infinite linear; }
+              .spoke_ccw_${uid} { transform-origin: 270px 60px; animation: fourSpokeLockSpinCCW_${uid} 12s infinite linear; }
+              .dark_sweep_${uid} { animation: darkGoldLightSweep_${uid} 4.5s infinite ease-in-out; }
+              .vault_txt_${uid} { animation: aggressiveTextPulse_${uid} 2.2s infinite ease-in-out; }
+            </style>
+            <linearGradient id="v_bg_${uid}" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#020001" /><stop offset="50%" stop-color="#140205" /><stop offset="100%" stop-color="#020001" />
+            </linearGradient>
+            <linearGradient id="v_gold_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fff4b8" /><stop offset="50%" stop-color="#d4af37" /><stop offset="100%" stop-color="#5c4300" />
+            </linearGradient>
+          </defs>
+          <rect x="0" y="0" width="540" height="120" rx="12" fill="url(#v_bg_${uid})" stroke="url(#v_gold_${uid})" stroke-width="2" />
+          <text x="270" y="65" text-anchor="middle" fill="#d4af37" font-family="monospace" font-size="16" font-weight="bold">VAULTED ARCHIVE UNIT</text>
+        </svg>
+      `;
+    }
+
+    function getLegendaryBannerSVG(uid) {
+      return `
+        <svg viewBox="0 0 540 120" width="100%" height="auto" style="overflow: visible;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="l_bg_${uid}" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#040608" /><stop offset="50%" stop-color="#1e293b" /><stop offset="100%" stop-color="#040608" />
+            </linearGradient>
+            <linearGradient id="l_gold_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fffbeb" /><stop offset="50%" stop-color="#eab308" /><stop offset="100%" stop-color="#854d0e" />
+            </linearGradient>
+          </defs>
+          <rect x="0" y="0" width="540" height="120" rx="12" fill="url(#l_bg_${uid})" stroke="url(#l_gold_${uid})" stroke-width="2" />
+          <text x="270" y="65" text-anchor="middle" fill="#fde047" font-family="monospace" font-size="16" font-weight="bold">LEGENDARY LAB RUN</text>
+        </svg>
+      `;
+    }
+
     // --- Transposition Cipher Functions ---
     window.generateScrambledAuthToken = function(timestampStr, username, bidPrice, basePrice) {
       const diff = Math.max(0, bidPrice - basePrice);
@@ -2210,7 +2263,7 @@
       try {
         await signInWithPopup(auth, provider);
       } catch (err) {
-        console.warn("Popup blocked, trying redirect:", err);
+        console.warn("Popup blocked or rejected, trying redirect:", err);
         try {
           await signInWithRedirect(auth, provider);
         } catch (redirErr) {
