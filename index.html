@@ -362,19 +362,13 @@
       overflow: visible;
     }
 
-    /* FULL-SCREEN OVERLAYS (CODE LOCKER & PROVENANCE VERIFY - RETAINS NAVBAR HEADER) */
+    /* FULL-SCREEN OVERLAYS (CODE LOCKER & PROVENANCE VERIFY - MATCHES PRODUCT PAGE LAYOUT) */
     .fullscreen-overlay {
       display: none;
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      z-index: 1500;
-      padding: 2.5rem 1.5rem;
-      overflow-y: auto;
-    }
-    .fullscreen-overlay-content {
-      max-width: 1000px;
+      min-height: calc(100vh - 80px);
+      max-width: 1200px;
       margin: 0 auto;
+      padding: 2.5rem 1.5rem 5rem;
     }
 
     /* MODAL POPUPS */
@@ -712,7 +706,7 @@
 </head>
 <body>
 
-  <!-- Persistent Top Navigation Bar -->
+  <!-- Persistent Top Navigation Bar (Always Visible) -->
   <nav>
     <a href="javascript:void(0)" class="brand" id="navHomeLink">
       <svg class="brand-icon-svg" width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -736,7 +730,6 @@
           <span class="user-name" id="userName">User Name</span>
           <span class="user-email" id="userEmail">user@gmail.com</span>
           
-          <!-- Verify ID & Provenance inside Profile Menu -->
           <button class="menu-item-btn" id="openVerifyBtn">
             <span>🛡️</span> Verify ID &amp; Provenance
           </button>
@@ -902,37 +895,33 @@
     </div>
   </div>
 
-  <!-- VIEW 4: FULL-SCREEN DIGITAL CODE LOCKER OVERLAY (RETAINS NAVBAR HEADER) -->
+  <!-- VIEW 4: FULL-SCREEN DIGITAL CODE LOCKER OVERLAY (MATCHES PRODUCT PAGE STYLE) -->
   <div id="codeVaultOverlay" class="fullscreen-overlay">
-    <div class="fullscreen-overlay-content">
-      <button class="back-btn" id="closeCodeVaultOverlay">&larr; BACK TO LAB</button>
-      <h2 style="font-family:var(--font-code); font-size:1.75rem; color:var(--accent-neon); margin-bottom:0.5rem;">🔐 My Digital Code Locker</h2>
-      <p style="color:var(--muted); margin-bottom:2rem;">Your purchased firmware, scripts, and CAD schematics tied to your Google account.</p>
-      <div id="codeVaultItemsList" style="display:flex; flex-direction:column; gap:1rem;"></div>
-    </div>
+    <button class="back-btn" id="closeCodeVaultOverlay">&larr; BACK TO SHOP</button>
+    <h2 style="font-family:var(--font-code); font-size:1.75rem; color:var(--accent-neon); margin-bottom:0.5rem;">🔐 My Digital Code Locker</h2>
+    <p style="color:var(--muted); margin-bottom:2rem;">Your purchased firmware, scripts, and CAD schematics tied to your Google account.</p>
+    <div id="codeVaultItemsList" style="display:flex; flex-direction:column; gap:1rem;"></div>
   </div>
 
-  <!-- VIEW 5: FULL-SCREEN UNIVERSAL PROVENANCE & AUTHENTICATION OVERLAY (RETAINS NAVBAR HEADER) -->
+  <!-- VIEW 5: FULL-SCREEN UNIVERSAL PROVENANCE & AUTHENTICATION OVERLAY -->
   <div id="verifyOverlay" class="fullscreen-overlay">
-    <div class="fullscreen-overlay-content">
-      <button class="back-btn" id="closeVerifyOverlay">&larr; BACK TO LAB</button>
-      <h2 style="font-family:var(--font-code); font-size:1.75rem; color:var(--accent-neon); margin-bottom:0.5rem;">🛡️ Universal Hardware Authentication Terminal</h2>
-      <p style="color:var(--muted); margin-bottom:2rem;">Enter any Omnimade hardware serial number or chassis stamp to verify authenticity, maker provenance, and batch specs across all drops.</p>
-      
-      <div style="background:var(--card-bg); border:1px solid var(--card-border); padding:2rem; border-radius:16px; max-width:600px;">
-        <div style="display:flex; flex-direction:column; gap:1rem;">
-          <div>
-            <label style="font-family:var(--font-code); font-size:0.75rem; color:var(--muted); text-transform:uppercase;">Hardware Chassis Serial / Stamp</label>
-            <input type="text" id="verifySerialInput" class="review-input" placeholder="e.g. OMNI-DROP-01" style="margin-top:0.35rem; text-transform:uppercase;">
-          </div>
-          <div>
-            <label style="font-family:var(--font-code); font-size:0.75rem; color:var(--muted); text-transform:uppercase;">Secret Scratch Key / Auth Code</label>
-            <input type="text" id="verifyKeyInput" class="review-input" placeholder="e.g. OMNI-AUTH-KEY" style="margin-top:0.35rem; text-transform:uppercase;">
-          </div>
-          <button class="btn-glow" id="verifySubmitBtn" style="width:100%; padding:0.85rem;">AUTHENTICATE HARDWARE</button>
+    <button class="back-btn" id="closeVerifyOverlay">&larr; BACK TO SHOP</button>
+    <h2 style="font-family:var(--font-code); font-size:1.75rem; color:var(--accent-neon); margin-bottom:0.5rem;">🛡️ Universal Hardware Authentication Terminal</h2>
+    <p style="color:var(--muted); margin-bottom:2rem;">Enter any Omnimade hardware serial number or chassis stamp to verify authenticity, maker provenance, and batch specs across all drops.</p>
+    
+    <div style="background:var(--card-bg); border:1px solid var(--card-border); padding:2rem; border-radius:16px; max-width:600px;">
+      <div style="display:flex; flex-direction:column; gap:1rem;">
+        <div>
+          <label style="font-family:var(--font-code); font-size:0.75rem; color:var(--muted); text-transform:uppercase;">Hardware Chassis Serial / Stamp</label>
+          <input type="text" id="verifySerialInput" class="review-input" placeholder="e.g. OMNI-DROP-01" style="margin-top:0.35rem; text-transform:uppercase;">
         </div>
-        <div id="verifyResultArea" style="margin-top:1.5rem;"></div>
+        <div>
+          <label style="font-family:var(--font-code); font-size:0.75rem; color:var(--muted); text-transform:uppercase;">Secret Scratch Key / Auth Code</label>
+          <input type="text" id="verifyKeyInput" class="review-input" placeholder="e.g. OMNI-AUTH-KEY" style="margin-top:0.35rem; text-transform:uppercase;">
+        </div>
+        <button class="btn-glow" id="verifySubmitBtn" style="width:100%; padding:0.85rem;">AUTHENTICATE HARDWARE</button>
       </div>
+      <div id="verifyResultArea" style="margin-top:1.5rem;"></div>
     </div>
   </div>
 
@@ -1418,22 +1407,32 @@
 
     document.getElementById('openCodeVaultBtn').onclick = () => {
       document.getElementById('userMenu').classList.remove('active');
+      document.getElementById('shopView').style.display = 'none';
+      document.getElementById('productPageView').style.display = 'none';
+      document.getElementById('auctionView').style.display = 'none';
+      verifyOverlay.style.display = 'none';
       codeVaultOverlay.style.display = 'block';
+      window.scrollTo(0, 0);
       loadUserCodeLocker();
     };
     document.getElementById('closeCodeVaultOverlay').onclick = () => {
-      codeVaultOverlay.style.display = 'none';
+      showShopView();
     };
 
     document.getElementById('openVerifyBtn').onclick = () => {
       document.getElementById('userMenu').classList.remove('active');
+      document.getElementById('shopView').style.display = 'none';
+      document.getElementById('productPageView').style.display = 'none';
+      document.getElementById('auctionView').style.display = 'none';
+      codeVaultOverlay.style.display = 'none';
       verifyOverlay.style.display = 'block';
+      window.scrollTo(0, 0);
       document.getElementById('verifyResultArea').innerHTML = '';
       document.getElementById('verifySerialInput').value = '';
       document.getElementById('verifyKeyInput').value = '';
     };
     document.getElementById('closeVerifyOverlay').onclick = () => {
-      verifyOverlay.style.display = 'none';
+      showShopView();
     };
 
     // --- UNIVERSAL HARDWARE AUTHENTICATION TERMINAL ---
