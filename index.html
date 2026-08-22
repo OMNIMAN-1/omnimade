@@ -11,6 +11,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>OMNIMADE | Hardware &amp; Automation Lab</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -169,6 +170,11 @@
       box-shadow: 0 0 15px var(--accent-glow);
       font-size: 0.875rem;
       font-family: var(--font-main);
+      transition: all 0.2s ease;
+    }
+    .btn-glow:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 0 20px var(--accent-glow);
     }
 
     .profile-container { position: relative; display: none; }
@@ -719,6 +725,8 @@
     </a>
     
     <div class="nav-actions">
+      <button class="nav-btn" id="openVerifyBtn"><span>🛡️</span> VERIFY ID</button>
+      
       <button class="cart-btn" id="openCartBtn">
         🛒 CART <span class="cart-count" id="cartBadge">0</span>
       </button>
@@ -730,10 +738,6 @@
         <div class="user-menu" id="userMenu">
           <span class="user-name" id="userName">User Name</span>
           <span class="user-email" id="userEmail">user@gmail.com</span>
-          
-          <button class="menu-item-btn" id="openVerifyBtn">
-            <span>🛡️</span> Verify ID &amp; Provenance
-          </button>
           
           <button class="menu-item-btn" id="openCodeVaultBtn">
             <span>🔐</span> My Digital Code Locker
@@ -896,22 +900,6 @@
     </div>
   </div>
 
-  <!-- PROVENANCE & DYNAMIC SCRAMBLE VERIFICATION MODAL -->
-  <div id="verifyModal" class="popup-modal">
-    <div class="popup-modal-content" style="max-width:560px;">
-      <h3 style="color:var(--accent-neon); font-family:var(--font-code);">🛡️ Cryptographic Provenance Terminal</h3>
-      <p style="font-size:0.85rem; color:var(--muted); margin-bottom:1rem;">
-        Enter the stamped scrambled authentication token from the wax-sealed metal card:
-      </p>
-      <div style="display:flex; flex-direction:column; gap:0.75rem;">
-        <input type="text" id="verifyScrambleInput" class="review-input" placeholder="e.g. OMNI-AUTH-272050882002OM6N1IK2I5N7G17658P0M3" style="text-transform:uppercase;">
-        <button class="btn-glow" id="verifySubmitBtn" style="width:100%;">DECODE &amp; VERIFY PROVENANCE</button>
-      </div>
-      <div id="verifyResultArea" style="margin-top:1rem;"></div>
-      <button class="close-modal-btn" id="closeVerifyBtn">CLOSE</button>
-    </div>
-  </div>
-
   <!-- INTERACTIVE RARITY POPUP MODAL (SHOWS FULL-SIZE BANNER & SPECS) -->
   <div id="rarityModal" class="popup-modal">
     <div class="popup-modal-content" style="text-align:center;">
@@ -924,12 +912,43 @@
     </div>
   </div>
 
+  <!-- PROVENANCE & AUTHENTICITY VERIFICATION MODAL -->
+  <div id="verifyModal" class="popup-modal">
+    <div class="popup-modal-content" style="max-width:520px;">
+      <h3 style="color:var(--accent-neon); font-family:var(--font-code);">🛡️ Provenance &amp; Authenticity Terminal</h3>
+      <p style="font-size:0.85rem; color:var(--muted); margin-bottom:1rem;">
+        Enter the engraved hardware serial number and the secret scratch key from your metal certificate card:
+      </p>
+
+      <div style="display:flex; flex-direction:column; gap:0.75rem;">
+        <div>
+          <label style="font-family:var(--font-code); font-size:0.7rem; color:var(--muted); text-transform:uppercase;">Chassis Serial / Stamp Number</label>
+          <input type="text" id="verifySerialInput" class="review-input" placeholder="e.g. OMNI-VLT-02" style="margin-top:0.25rem; text-transform:uppercase;">
+        </div>
+
+        <div>
+          <label style="font-family:var(--font-code); font-size:0.7rem; color:var(--muted); text-transform:uppercase;">Scratch-off Secret Key</label>
+          <input type="text" id="verifyKeyInput" class="review-input" placeholder="e.g. X9F2-K89A" style="margin-top:0.25rem; text-transform:uppercase;">
+        </div>
+
+        <button class="btn-glow" id="verifySubmitBtn" style="width:100%; margin-top:0.25rem;">VERIFY PROVENANCE</button>
+      </div>
+
+      <div id="verifyResultArea" style="margin-top:1rem;"></div>
+      <button class="close-modal-btn" id="closeVerifyBtn" style="margin-top:1rem;">CLOSE</button>
+    </div>
+  </div>
+
   <!-- DIGITAL CODE LOCKER MODAL -->
   <div id="codeVaultModal" class="popup-modal">
     <div class="popup-modal-content" style="max-height:85vh; display:flex; flex-direction:column; max-width:550px;">
       <h3 style="font-family:var(--font-code); color:var(--accent-neon);">🔐 My Digital Code Locker</h3>
       <p style="color:var(--muted); font-size:0.8rem; margin-bottom:1rem;">Your purchased firmware, scripts, and CAD schematics tied to your Google account.</p>
-      <div id="codeVaultItems" style="overflow-y:auto; display:flex; flex-direction:column; gap:0.75rem;"></div>
+      
+      <div id="codeVaultItems" style="overflow-y:auto; display:flex; flex-direction:column; gap:0.75rem; max-height:360px;">
+        <p style="color:var(--muted); font-size:0.85rem; text-align:center;">Loading digital locker...</p>
+      </div>
+      
       <button class="close-modal-btn" id="closeCodeVaultBtn">CLOSE</button>
     </div>
   </div>
@@ -1062,6 +1081,7 @@
     function saveCart() {
       localStorage.setItem('omnimade_cart_map', JSON.stringify(cart));
       updateCartUI();
+      renderGrid(projects);
       if (activeProductId) renderProductPageQtyArea(activeProductId);
     }
 
@@ -1075,31 +1095,6 @@
       const totalLive = typeof liveStockMap[productId] === 'number' ? liveStockMap[productId] : (item.stock ?? 50);
       return Math.max(0, totalLive);
     }
-
-    // --- Dynamic Transposition Cipher ---
-    window.generateScrambledAuthToken = function(timestampStr, username, bidPrice, basePrice) {
-      const diff = Math.max(0, bidPrice - basePrice);
-      const raw = `${timestampStr}${bidPrice}${username.toUpperCase().replace(/\s+/g, '')}${diff}`;
-      let scrambled = "";
-      const len = raw.length;
-      for (let i = 0; i < Math.ceil(len / 2); i++) {
-        scrambled += raw[i];
-        if (len - 1 - i > i) scrambled += raw[len - 1 - i];
-      }
-      return `OMNI-AUTH-${scrambled}`;
-    };
-
-    window.decodeScrambledAuthToken = function(scrambledToken) {
-      const clean = scrambledToken.replace('OMNI-AUTH-', '').trim();
-      const len = clean.length;
-      const left = [];
-      const right = [];
-      for (let i = 0; i < len; i++) {
-        if (i % 2 === 0) left.push(clean[i]);
-        else right.push(clean[i]);
-      }
-      return left.join('') + right.reverse().join('');
-    };
 
     // --- THEME ENGINE ---
     function applyTheme(preference) {
@@ -1711,6 +1706,8 @@
     function renderGrid(items) {
       document.getElementById('grid').innerHTML = items.map(item => {
         const stockLeft = typeof liveStockMap[item.id] === 'number' ? liveStockMap[item.id] : (item.stock ?? 50);
+        const currentInCart = cart[item.id] || 0;
+        const isFullyInCart = currentInCart >= stockLeft;
         const isOutOfStock = stockLeft <= 0;
         const isLowStock = stockLeft > 0 && stockLeft < 10;
         const isAuction = item.isAuction || item.rarity === 'vaulted' || item.category === 'auction';
@@ -1720,6 +1717,8 @@
           stockNotice = `<div class="stock-warning" style="color:#d4af37;">⚡ LIVE BIDDING ARENA ACTIVE</div>`;
         } else if (isOutOfStock) {
           stockNotice = `<div class="stock-warning">🔴 OUT OF STOCK</div>`;
+        } else if (isFullyInCart) {
+          stockNotice = `<div class="stock-warning" style="color:var(--accent-gold);">⚠️ ALL STOCK (${stockLeft}) IN CART</div>`;
         } else if (isLowStock) {
           stockNotice = `<div class="stock-warning">⚠️ ONLY ${stockLeft} UNITS LEFT!</div>`;
         }
@@ -1742,8 +1741,8 @@
               ${isAuction ? `
                 <button class="btn-buy" style="background:#ff2a4b; width:100%;" onclick="openAuctionRoom('${item.id}')">⚡ ENTER AUCTION ROOM</button>
               ` : `
-                <button class="btn-cart ${isOutOfStock ? 'btn-disabled' : ''}" onclick="addToCart('${item.id}')">${isOutOfStock ? 'OUT OF STOCK' : 'ADD TO CART'}</button>
-                <button class="btn-buy ${isOutOfStock ? 'btn-disabled' : ''}" onclick="buyNow('${item.id}')">${isOutOfStock ? 'SOLD OUT' : 'BUY NOW'}</button>
+                <button class="btn-cart ${isOutOfStock || isFullyInCart ? 'btn-disabled' : ''}" onclick="addToCart('${item.id}')">${isOutOfStock ? 'OUT OF STOCK' : isFullyInCart ? 'MAXED IN CART' : 'ADD TO CART'}</button>
+                <button class="btn-buy ${isOutOfStock || isFullyInCart ? 'btn-disabled' : ''}" onclick="buyNow('${item.id}')">${isOutOfStock ? 'SOLD OUT' : isFullyInCart ? 'MAXED IN CART' : 'BUY NOW'}</button>
               `}
             </div>
           </div>
@@ -1802,12 +1801,16 @@
       `).join('');
 
       const stockLeft = getAvailableStock(id);
+      const currentInCart = cart[id] || 0;
+      const isFullyInCart = currentInCart >= stockLeft;
       const isOutOfStock = stockLeft <= 0;
       const isLowStock = stockLeft > 0 && stockLeft < 10;
 
       const stockNoticeEl = document.getElementById('pageStockNotice');
       if (isOutOfStock) {
         stockNoticeEl.innerHTML = `<div class="stock-warning" style="margin-bottom:1rem;">🔴 OUT OF STOCK</div>`;
+      } else if (isFullyInCart) {
+        stockNoticeEl.innerHTML = `<div class="stock-warning" style="color:var(--accent-gold); margin-bottom:1rem;">⚠️ ALL STOCK (${stockLeft}) IN CART</div>`;
       } else if (isLowStock) {
         stockNoticeEl.innerHTML = `<div class="stock-warning" style="margin-bottom:1rem;">⚠️ ONLY ${stockLeft} UNITS LEFT!</div>`;
       } else {
@@ -1817,11 +1820,11 @@
       const cartBtn = document.getElementById('pageAddCartBtn');
       const buyBtn = document.getElementById('pageBuyBtn');
 
-      if (isOutOfStock) {
+      if (isOutOfStock || isFullyInCart) {
         cartBtn.classList.add('btn-disabled');
-        cartBtn.innerText = 'OUT OF STOCK';
+        cartBtn.innerText = isOutOfStock ? 'OUT OF STOCK' : 'MAXED IN CART';
         buyBtn.classList.add('btn-disabled');
-        buyBtn.innerText = 'SOLD OUT';
+        buyBtn.innerText = isOutOfStock ? 'SOLD OUT' : 'MAXED IN CART';
       } else {
         cartBtn.classList.remove('btn-disabled');
         cartBtn.innerText = 'ADD TO CART';
