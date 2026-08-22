@@ -741,11 +741,6 @@
     </a>
     
     <div class="nav-actions">
-      <!-- Direct Verify ID Button in Navbar as requested -->
-      <button class="nav-btn" id="openVerifyBtn">
-        <span>🛡️</span> VERIFY ID
-      </button>
-
       <button class="cart-btn" id="openCartBtn">
         🛒 CART <span class="cart-count" id="cartBadge">0</span>
       </button>
@@ -757,6 +752,10 @@
         <div class="user-menu" id="userMenu">
           <span class="user-name" id="userName">User Name</span>
           <span class="user-email" id="userEmail">user@gmail.com</span>
+          
+          <button class="menu-item-btn" id="openVerifyBtn">
+            <span>🛡️</span> Verify ID &amp; Provenance
+          </button>
           
           <button class="menu-item-btn" id="openCodeVaultBtn">
             <span>🔐</span> My Digital Code Locker
@@ -1404,7 +1403,7 @@
       document.getElementById('rarityModal').style.display = 'none';
     };
 
-    // --- FULL-SCREEN OVERLAY & MODAL CONTROLLERS ---
+    // --- FULL-SCREEN OVERLAY CONTROLLERS (VERIFY & CODE LOCKER) ---
     const codeVaultOverlay = document.getElementById('codeVaultOverlay');
     const verifyOverlay = document.getElementById('verifyOverlay');
 
@@ -1418,6 +1417,7 @@
     };
 
     document.getElementById('openVerifyBtn').onclick = () => {
+      document.getElementById('userMenu').classList.remove('active');
       verifyOverlay.style.display = 'block';
       document.getElementById('verifyResultArea').innerHTML = '';
       document.getElementById('verifySerialInput').value = '';
@@ -1502,7 +1502,7 @@
         const snapshot = await getDocs(q);
 
         if (snapshot.empty) {
-          container.innerHTML = `<div style="color:var(--muted); text-align:center; padding:2rem;">No digital script packages found in your order history.</div>`;
+          container.innerHTML = `<div style="color:var(--muted); text-align:center; padding:2rem;">No digital drops purchased yet.</div>`;
           return;
         }
 
@@ -1536,7 +1536,7 @@
       }
     }
 
-    // --- OTHER POPUP MODALS ---
+    // --- POPUP MODAL CONTROLLERS ---
     document.getElementById('openSupportBtn').onclick = () => {
       document.getElementById('userMenu').classList.remove('active');
       document.getElementById('supportModal').style.display = 'flex';
@@ -2208,6 +2208,8 @@
     function showShopView() {
       document.getElementById('productPageView').style.display = 'none';
       document.getElementById('auctionView').style.display = 'none';
+      codeVaultOverlay.style.display = 'none';
+      verifyOverlay.style.display = 'none';
       document.getElementById('shopView').style.display = 'block';
       window.scrollTo(0, 0);
     }
@@ -2215,232 +2217,6 @@
 
     document.getElementById('backToShopBtn').addEventListener('click', showShopView);
     document.getElementById('navHomeLink').addEventListener('click', showShopView);
-
-    // --- RAZORPAY CHECKOUT & FIRESTORE ORDER SYNC ---
-    function triggerRazorpayPayment(amountInRupees, orderDescription, orderItemsArray) {
-      if (!currentUser) {
-        alert("Please Sign In first to proceed with your order.");
-        signInWithPopup(auth, provider);
-        return;
-      }
-
-      const options = {
-        "key": "rzp_live_TPyrohl5D0MqoZ",
-        "amount": Math.round(amountInRupees * 100),
-        "currency": "INR",
-        "name": "OMNIMADE",
-        "description": orderDescription,
-        "handler": async function (response) {
-          try {
-            await addDoc(collection(db, "orders"), {
-              userId: currentUser.uid,
-              customerName: currentUser.displayName || "Omnimade Member",
-              customerEmail: currentUser.email,
-              paymentId: response.razorpay_payment_id,
-              orderDescription: orderDescription,
-              amountPaid: amountInRupees,
-              items: orderItemsArray,
-              orderStatus: "Confirmed / Synced with Shiprocket",
-              createdAt: serverTimestamp()
-            });
-
-            for (const orderItem of orderItemsArray) {
-              if (orderItem.id) {
-                const itemRef = doc(db, "inventory", orderItem.id);
-                await updateDoc(itemRef, {
-                  stock: increment(-orderItem.quantity)
-                });
-                if (typeof liveStockMap[orderItem.id] === 'number') {
-                  liveStockMap[orderItem.id] = Math.max(0, liveStockMap[orderItem.id] - orderItem.quantity);
-                }
-              }
-            }
-
-            renderGrid(projects);
-          } catch (e) {
-            console.error("Firestore order/stock error:", e);
-          }
-
-          alert("🎉 Payment Successful! Order Reference: " + response.razorpay_payment_id + "\nYour parcel tracking info will be emailed to you.");
-          cart = {};
-          saveCart();
-          document.getElementById('cartDrawer').classList.remove('active');
-        },
-        "prefill": {
-          "name": currentUser ? currentUser.displayName : "",
-          "email": currentUser ? currentUser.email : "",
-          "contact": ""
-        },
-        "theme": {
-          "color": "#3b82f6"
-        }
-      };
-
-      const rzp = new Razorpay(options);
-      rzp.open();
-    }
-
-    document.getElementById('checkoutBtn').onclick = () => {
-      const cartKeys = Object.keys(cart);
-      if (cartKeys.length === 0) return alert('Your cart is empty!');
-
-      const orderItemsArray = [];
-      for (const id of cartKeys) {
-        const item = projects.find(p => p.id === id);
-        const qty = cart[id];
-        const available = getAvailableStock(id);
-
-        if (qty > available) {
-          return alert(`Inventory limit exceeded for ${item.title}. Only ${available} units left!`);
-        }
-
-        orderItemsArray.push({
-          id: item.id,
-          title: item.title,
-          price: item.price,
-          priceNumeric: item.priceNumeric,
-          quantity: qty
-        });
-      }
-
-      const rawTotal = Object.entries(cart).reduce((sum, [id, qty]) => {
-        const item = projects.find(p => p.id === id);
-        const price = item ? (item.priceNumeric || parseInt((item.price || '').replace(/[^0-9]/g, '')) || 0) : 0;
-        return sum + (price * qty);
-      }, 0);
-
-      let discountAmount = 0;
-      if (activeCoupon && rawTotal >= activeCoupon.minOrderAmount) {
-        if (activeCoupon.type === 'percentage') {
-          discountAmount = Math.round((rawTotal * activeCoupon.value) / 100);
-        } else if (activeCoupon.type === 'flat') {
-          discountAmount = activeCoupon.value;
-        }
-      }
-
-      const finalAmount = Math.max(1, rawTotal - discountAmount);
-
-      triggerRazorpayPayment(finalAmount, `Order of ${getTotalCartCount()} item(s) from Lab Cart`, orderItemsArray);
-    };
-
-    // --- FETCH USER ORDERS ---
-    async function loadUserOrders() {
-      const container = document.getElementById('ordersListContainer');
-      if (!currentUser) {
-        container.innerHTML = '<p style="color:var(--muted); font-size:0.85rem; text-align:center;">Please sign in to view your orders.</p>';
-        return;
-      }
-
-      try {
-        const q = query(collection(db, "orders"), where("userId", "==", currentUser.uid));
-        const snapshot = await getDocs(q);
-
-        if (snapshot.empty) {
-          container.innerHTML = '<p style="color:var(--muted); font-size:0.85rem; text-align:center;">No past orders found.</p>';
-          return;
-        }
-
-        let html = '';
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
-          html += `
-            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--card-border); padding:0.75rem; border-radius:8px;">
-              <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-family:var(--font-code); color:var(--accent-neon);">
-                <span>#${docSnap.id.slice(0, 8).toUpperCase()}</span>
-                <span>₹${data.amountPaid}</span>
-              </div>
-              <div style="font-weight:bold; font-size:0.85rem; margin:0.3rem 0;">${data.orderDescription || 'Lab Drop Order'}</div>
-              <div style="font-size:0.75rem; color:var(--accent-green); font-family:var(--font-code);">${data.orderStatus || 'Confirmed'}</div>
-            </div>
-          `;
-        });
-        container.innerHTML = html;
-      } catch (err) {
-        console.error(err);
-        container.innerHTML = '<p style="color:var(--danger); font-size:0.85rem; text-align:center;">Failed to load receipts.</p>';
-      }
-    }
-
-    // --- REVIEWS ENGINE ---
-    function listenToReviews(productId) {
-      if (unsubscribeReviews) unsubscribeReviews();
-
-      const q = query(collection(db, "reviews"), where("productId", "==", productId));
-      
-      unsubscribeReviews = onSnapshot(q, (snapshot) => {
-        currentReviewsList = [];
-        snapshot.forEach((docSnap) => {
-          currentReviewsList.push({ id: docSnap.id, ...docSnap.data() });
-        });
-        renderReviewsList(currentReviewsList);
-      });
-    }
-
-    document.querySelectorAll('#starRating span').forEach(star => {
-      star.addEventListener('click', (e) => {
-        selectedRating = parseInt(e.target.getAttribute('data-star'));
-        document.querySelectorAll('#starRating span').forEach((s, idx) => {
-          s.style.color = idx < selectedRating ? '#eab308' : '#374151';
-        });
-      });
-    });
-
-    document.getElementById('submitReviewBtn').addEventListener('click', async () => {
-      if (!currentUser) {
-        document.getElementById('authError').style.display = 'block';
-        return;
-      }
-      
-      const txt = document.getElementById('reviewText').value.trim();
-      if (!txt) return;
-
-      try {
-        await addDoc(collection(db, "reviews"), {
-          productId: activeProductId,
-          userId: currentUser.uid,
-          author: currentUser.displayName ? currentUser.displayName.split(' ')[0] : 'Member',
-          rating: selectedRating,
-          text: txt,
-          createdAt: new Date().toISOString()
-        });
-
-        document.getElementById('reviewText').value = '';
-      } catch (err) {
-        console.error("Error saving review:", err);
-      }
-    });
-
-    function renderReviewsList(list) {
-      document.getElementById('reviewList').innerHTML = list.map(r => {
-        const isAuthor = currentUser && currentUser.uid === r.userId;
-        const canDelete = isAuthor || isUserAdmin;
-
-        return `
-          <div style="background:#080c14; border:1px solid var(--card-border); padding:0.75rem; border-radius:8px; font-size:0.85rem; display:flex; justify-content:space-between; align-items:flex-start;">
-            <div style="flex-grow:1;">
-              <div style="color:var(--accent-neon); font-weight:bold; font-family:var(--font-code);">${r.author} (${'★'.repeat(r.rating)}) ${isAuthor ? '<span style="color:var(--muted); font-size:0.7rem;">(You)</span>' : ''}</div>
-              <div style="color:var(--muted); margin-top:0.25rem;">${r.text}</div>
-            </div>
-            ${canDelete ? `<button onclick="deleteReview('${r.id}')" style="background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); color:#f87171; border-radius:4px; padding:0.2rem 0.5rem; cursor:pointer; font-size:0.75rem; font-family:var(--font-code);">DELETE</button>` : ''}
-          </div>
-        `;
-      }).join('') || '<span style="color:var(--muted); font-size:0.85rem;">No reviews yet. Be the first to drop feedback!</span>';
-    }
-
-    window.deleteReview = async function(reviewId) {
-      if (confirm("Are you sure you want to delete this review?")) {
-        try {
-          await deleteDoc(doc(db, "reviews", reviewId));
-        } catch (err) {
-          console.error("Permission denied or error deleting review:", err);
-          alert("Error: You do not have permission to delete this review.");
-        }
-      }
-    };
-
-    // --- CART DRAWER OPEN/CLOSE ---
-    document.getElementById('openCartBtn').onclick = () => document.getElementById('cartDrawer').classList.add('active');
-    document.getElementById('closeCartBtn').onclick = () => document.getElementById('cartDrawer').classList.remove('active');
 
     // --- FILTERS ---
     document.querySelectorAll('.filter-btn').forEach(btn => {
