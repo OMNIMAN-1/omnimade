@@ -362,7 +362,7 @@
       overflow: visible;
     }
 
-    /* FULL-SCREEN OVERLAYS (CODE LOCKER & PROVENANCE VERIFY) */
+    /* FULL-SCREEN OVERLAYS (CODE LOCKER & PROVENANCE VERIFY - RETAINS NAVBAR HEADER) */
     .fullscreen-overlay {
       display: none;
       position: fixed;
@@ -736,7 +736,7 @@
           <span class="user-name" id="userName">User Name</span>
           <span class="user-email" id="userEmail">user@gmail.com</span>
           
-          <!-- Moved Verify ID & Provenance inside Profile Menu -->
+          <!-- Verify ID & Provenance inside Profile Menu -->
           <button class="menu-item-btn" id="openVerifyBtn">
             <span>🛡️</span> Verify ID &amp; Provenance
           </button>
@@ -1624,6 +1624,37 @@
       if (activeProductId) renderReviewsList(currentReviewsList);
       if (activeAuctionData) renderBidActionBox(activeAuctionData);
     });
+
+    // --- INLINE SVG BADGE GENERATOR (FOR CARD META ROW & DETAIL HEADER) ---
+    function renderRarityBadgeHTML(item) {
+      const rarity = (item.rarity || 'common').toLowerCase();
+      const rarityLabel = item.rarityLabel || rarity.toUpperCase();
+      const madeCount = item.madeCount || '50';
+      const futurePlan = item.futurePlan || 'Limited Runs';
+      const clickHandler = `onclick="showRarityDetails(event, '${item.title.replace(/'/g, "\\'")}', '${rarity}', '${madeCount}', '${futurePlan}')"`;
+
+      if (rarity === 'vaulted') {
+        const uid = Math.random().toString(36).substring(2, 8);
+        return `
+          <div class="rarity-badge-svg-wrap" ${clickHandler}>
+            ${getVaultedBannerSVG(uid)}
+          </div>
+        `;
+      } else if (rarity === 'legendary') {
+        const uid = Math.random().toString(36).substring(2, 8);
+        return `
+          <div class="rarity-badge-svg-wrap" ${clickHandler}>
+            ${getLegendaryBannerSVG(uid)}
+          </div>
+        `;
+      } else {
+        return `
+          <span class="rarity-badge rarity-${rarity}" ${clickHandler}>
+            ${rarityLabel}
+          </span>
+        `;
+      }
+    }
 
     // --- LIVE AUCTION ARENA CONTROLLER ---
     window.openAuctionRoom = function(auctionId) {
