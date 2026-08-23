@@ -362,7 +362,7 @@
       overflow: visible;
     }
 
-    /* AUCTION ROOM SPECIFIC QUICK-BID BUTTONS */
+    /* AUCTION QUICK-BID BUTTONS */
     .auction-quick-btn {
       flex: 1;
       background: #111827;
@@ -1915,7 +1915,6 @@
     }
 
     // --- CUSTOM NUMPAD MODAL HANDLERS ---
-    // --- CUSTOM NUMPAD MODAL HANDLERS ---
     window.openCustomBidModal = function(minRequired) {
       const minStep = activeAuctionData.minBidIncrement || 500;
       const currentHighest = activeAuctionData.currentBid || 0;
@@ -1926,7 +1925,7 @@
       const inputEl = document.getElementById('customBidInput');
       inputEl.value = strictMin;
       inputEl.min = strictMin;
-      inputEl.step = minStep; // Forces spinner arrows to jump by 500
+      inputEl.step = minStep;
       
       document.getElementById('customBidModal').style.display = 'flex';
     };
@@ -1946,13 +1945,11 @@
         return;
       }
 
-      // Check 1: Must be at least ₹500 higher than current bid
       if (inputVal < strictMinimum) {
         alert(`❌ Invalid Bid: Your bid must be at least ₹${strictMinimum.toLocaleString('en-IN')} (Minimum +₹${minStep} above current highest bid).`);
         return;
       }
 
-      // Check 2: Must be an exact increment of 500 (blocks irregular numbers like 28010, 28520)
       const excess = (inputVal - currentHighest) % minStep;
       if (excess !== 0) {
         const roundedValid = inputVal + (minStep - excess);
@@ -1964,6 +1961,83 @@
       placeQuickBid(inputVal);
     };
 
+    // --- ADMIN AUCTION CONTROLS ---
+    window.adminStartAuction = async function() {
+      if (!isUserAdmin || !activeAuctionData) {
+        alert("Admin privileges and an active auction item are required.");
+        return;
+      }
+      
+      const auctionId = activeAuctionData.id || "vaulted-core-01";
+      const jsonItem = projects.find(p => p.id === auctionId) || {};
+      
+      const title = activeAuctionData.title || jsonItem.title || "Omni Vaulted Drop";
+      const startingReserve = activeAuctionData.priceNumeric || jsonItem.priceNumeric || activeAuctionData.currentBid || 24999;
+      const minIncrement = activeAuctionData.minBidIncrement || jsonItem.minBidIncrement || 500;
+      const imageUrl = activeAuctionData.image || jsonItem.image || "./Assets/omnimade-logo.png";
+      const desc = activeAuctionData.description || jsonItem.description || "Limited edition hardware drop.";
+
+      try {
+        const auctionRef = doc(db, "auctions", auctionId);
+        const newEndTime = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1-hour live run
+        
+        await setDoc(auctionRef, {
+          id: auctionId,
+          title: title,
+          status: "live",
+          currentBid: Number(startingReserve),
+          minBidIncrement: Number(minIncrement),
+          highestBidderName: "Reserve Open",
+          highestBidderUid: "",
+          endsAt: newEndTime,
+          image: imageUrl,
+          description: desc
+        }, { merge: true });
+
+        alert(`⚡ Auction for '${title}' is now LIVE!`);
+      } catch (e) {
+        console.error("Admin Auction Start Error:", e);
+        alert("Permission error or failed to start auction. Check console details.");
+      }
+    };
+
+    window.adminAddAuctionTime = async function(secondsToAdd) {
+      if (!isUserAdmin || !activeAuctionData) return;
+      try {
+        const auctionRef = doc(db, "auctions", activeAuctionData.id);
+        const currentEnd = new Date(activeAuctionData.endsAt || Date.now()).getTime();
+        const newEnd = new Date(Math.max(Date.now(), currentEnd) + secondsToAdd * 1000).toISOString();
+        await setDoc(auctionRef, { endsAt: newEnd, status: "live" }, { merge: true });
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    window.adminEndAuction = async function() {
+      if (!isUserAdmin || !activeAuctionData) return;
+      if (confirm(`Conclude auction now and award to ${activeAuctionData.highestBidderName || 'highest bidder'}?`)) {
+        try {
+          const auctionRef = doc(db, "auctions", activeAuctionData.id);
+          await setDoc(auctionRef, {
+            status: "ended",
+            endsAt: new Date().toISOString()
+          }, { merge: true });
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+
+    window.triggerAuctionNotificationBroadcast = async function() {
+      if (!isUserAdmin || !activeAuctionData) return;
+      try {
+        const subSnap = await getDocs(collection(db, "subscribers"));
+        alert(`📢 Drop announcement queued for ${subSnap.size} registered collectors:\n"${activeAuctionData.title}" launch scheduled!`);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
     window.placeQuickBid = async function(newAmount) {
       if (!currentUser || !activeAuctionData) return;
       
@@ -1971,9 +2045,8 @@
       const currentHighest = activeAuctionData.currentBid || 0;
       const strictMinimum = currentHighest + minStep;
 
-      // Backend-level client check before hitting Firestore
       if (newAmount < strictMinimum) {
-        return alert(`❌ Rejected: Bid ₹${newAmount.toLocaleString('en-IN')} is less than the minimum required ₹${strictMinimum.toLocaleString('en-IN')}`);
+        return alert(`❌ Rejected: Bid must be at least ₹${strictMinimum.toLocaleString('en-IN')}`);
       }
 
       try {
