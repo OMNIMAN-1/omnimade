@@ -1944,33 +1944,38 @@
         return;
       }
       
-      const auctionId = activeAuctionData.id;
-      const startingReserve = activeAuctionData.priceNumeric || activeAuctionData.basePrice || activeAuctionData.currentBid || 0;
+      const auctionId = activeAuctionData.id || "vaulted-core-01";
+      const jsonItem = projects.find(p => p.id === auctionId) || {};
       
+      const title = activeAuctionData.title || jsonItem.title || "Omni Vaulted Drop";
+      const startingReserve = activeAuctionData.priceNumeric || jsonItem.priceNumeric || activeAuctionData.currentBid || 24999;
+      const minIncrement = activeAuctionData.minBidIncrement || jsonItem.minBidIncrement || 500;
+      const imageUrl = activeAuctionData.image || jsonItem.image || "./Assets/omnimade-logo.png";
+      const desc = activeAuctionData.description || jsonItem.description || "Limited edition hardware drop.";
+
       try {
         const auctionRef = doc(db, "auctions", auctionId);
-        const newEndTime = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1-hour live run
-        
+        const newEndTime = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1-hour countdown
+
         await setDoc(auctionRef, {
           id: auctionId,
-          title: activeAuctionData.title,
+          title: title,
           status: "live",
-          currentBid: startingReserve,
-          minBidIncrement: activeAuctionData.minBidIncrement || 500,
+          currentBid: Number(startingReserve),
+          minBidIncrement: Number(minIncrement),
           highestBidderName: "Reserve Open",
           highestBidderUid: "",
           endsAt: newEndTime,
-          image: activeAuctionData.image || "./Assets/omnimade-logo.png",
-          description: activeAuctionData.description || ""
+          image: imageUrl,
+          description: desc
         }, { merge: true });
 
-        alert(`⚡ Auction for '${activeAuctionData.title}' is now LIVE!`);
+        alert(`⚡ Auction for '${title}' is now LIVE!`);
       } catch (e) {
         console.error("Admin Auction Start Error:", e);
-        alert("Permission error or failed to start auction. Check console.");
+        alert("Failed to start auction. Check console details.");
       }
     };
-
     window.adminAddAuctionTime = async function(secondsToAdd) {
       if (!isUserAdmin || !activeAuctionData) return;
       try {
