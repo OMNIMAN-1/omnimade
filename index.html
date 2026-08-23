@@ -1334,7 +1334,7 @@
             <text x="348" y="71" fill="#fde047" font-family="'JetBrains Mono', monospace" font-size="8.5" font-weight="700" letter-spacing="1.2">NUMBERED RUN</text>
           </g>
           <g>
-            <polygon points="244,14 296,14 316,34 316,86 296,106 244,106 224,86 224,34" fill="url(#l_plat_${uid})" stroke="#1e293b" stroke-width="2.5" />
+            <polygon points="244,14 296,14 316,34 316,86 296,106 244,106 224,86 224,34" fill="#1e293b" stroke="url(#l_plat_${uid})" stroke-width="2.5" />
             <polygon points="247,17 293,17 313,37 313,83 293,103 247,103 227,83 227,37" fill="#090d16" stroke="url(#l_gold_${uid})" stroke-width="1.2" />
             <g fill="#ef4444" stroke="url(#l_gold_${uid})" stroke-width="0.8"><circle cx="236" cy="26" r="2.2" /><circle cx="304" cy="26" r="2.2" /><circle cx="236" cy="94" r="2.2" /><circle cx="304" cy="94" r="2.2" /></g>
             <circle cx="270" cy="60" r="38" fill="#020617" stroke="url(#l_plat_${uid})" stroke-width="1.8" />
@@ -1637,37 +1637,6 @@
       if (activeProductId) renderReviewsList(currentReviewsList);
       if (activeAuctionData) renderBidActionBox(activeAuctionData);
     });
-
-    // --- INLINE SVG BADGE GENERATOR (FOR CARD META ROW & DETAIL HEADER) ---
-    function renderRarityBadgeHTML(item) {
-      const rarity = (item.rarity || 'common').toLowerCase();
-      const rarityLabel = item.rarityLabel || rarity.toUpperCase();
-      const madeCount = item.madeCount || '50';
-      const futurePlan = item.futurePlan || 'Limited Runs';
-      const clickHandler = `onclick="showRarityDetails(event, '${item.title.replace(/'/g, "\\'")}', '${rarity}', '${madeCount}', '${futurePlan}')"`;
-
-      if (rarity === 'vaulted') {
-        const uid = Math.random().toString(36).substring(2, 8);
-        return `
-          <div class="rarity-badge-svg-wrap" ${clickHandler}>
-            ${getVaultedBannerSVG(uid)}
-          </div>
-        `;
-      } else if (rarity === 'legendary') {
-        const uid = Math.random().toString(36).substring(2, 8);
-        return `
-          <div class="rarity-badge-svg-wrap" ${clickHandler}>
-            ${getLegendaryBannerSVG(uid)}
-          </div>
-        `;
-      } else {
-        return `
-          <span class="rarity-badge rarity-${rarity}" ${clickHandler}>
-            ${rarityLabel}
-          </span>
-        `;
-      }
-    }
 
     // --- LIVE AUCTION ARENA CONTROLLER ---
     window.openAuctionRoom = function(auctionId) {
@@ -2084,8 +2053,20 @@
     // --- CATALOG LOADER ---
     async function initCatalog() {
       try {
-        const res = await fetch('./projects.json?t=' + Date.now());
-        projects = await res.json();
+        // Fetch Regular Projects
+        const resProj = await fetch('./projects.json?t=' + Date.now());
+        const regularProjects = await resProj.json();
+
+        // Fetch Auction Items from new auctions.json file
+        let auctionProjects = [];
+        try {
+          const resAuc = await fetch('./auctions.json?t=' + Date.now());
+          auctionProjects = await resAuc.json();
+        } catch (e) {
+          console.log("No auctions.json found or empty.");
+        }
+
+        projects = [...regularProjects, ...auctionProjects];
 
         // Sync with Firestore Inventory
         for (const item of projects) {
