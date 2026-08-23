@@ -1689,17 +1689,18 @@
       
       currentAuctionUnsub = onSnapshot(auctionRef, (docSnap) => {
         if (!docSnap.exists()) {
+          const jsonItem = projects.find(p => p.id === auctionId) || {};
           const fallbackAuction = {
             id: auctionId,
-            title: "Omni Core Handheld [1 of 1 Public Unit]",
-            rarity: "vaulted",
-            basePrice: 24999,
-            currentBid: 24999,
-            minBidIncrement: 500,
-            status: "live",
-            image: "./Assets/omnimade-logo.png",
-            endsAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-            description: "Ultra-complex handcrafted build. Unit 02/02. Housed in a custom carved wooden presentation case with wax-sealed metal authentication dossier."
+            title: jsonItem.title || "Omni Core Handheld [1 of 1 Public Unit]",
+            rarity: jsonItem.rarity || "vaulted",
+            basePrice: jsonItem.priceNumeric || 24999,
+            currentBid: jsonItem.priceNumeric || 24999,
+            minBidIncrement: jsonItem.minBidIncrement || 500,
+            status: jsonItem.status || "draft",
+            image: jsonItem.image || "./Assets/omnimade-logo.png",
+            endsAt: jsonItem.endsAt || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+            description: jsonItem.description || "Limited edition hardware drop."
           };
           activeAuctionData = fallbackAuction;
           renderAuctionDetails(fallbackAuction);
@@ -1726,7 +1727,7 @@
       document.getElementById('auctionTitle').innerText = data.title;
       document.getElementById('auctionDesc').innerText = data.description || "Limited edition hardware drop.";
       document.getElementById('auctionItemImg').src = data.image || "./Assets/omnimade-logo.png";
-      document.getElementById('highestBidDisplay').innerText = `₹${data.currentBid.toLocaleString('en-IN')}`;
+      document.getElementById('highestBidDisplay').innerText = `₹${(data.currentBid || 0).toLocaleString('en-IN')}`;
       document.getElementById('highestBidderName').innerText = data.highestBidderName 
         ? `Highest Bidder: ${data.highestBidderName}` 
         : "Starting Reserve: Available";
@@ -1805,13 +1806,13 @@
         return;
       }
 
-      const nextMinBid = auction.currentBid + (auction.minBidIncrement || 500);
+      const nextMinBid = (auction.currentBid || 0) + (auction.minBidIncrement || 500);
       container.innerHTML = `
         <div style="display:flex; flex-direction:column; gap:0.6rem;">
           <div style="display:flex; gap:0.5rem;">
-            <button class="btn-glow" style="flex:1; background:rgba(255,255,255,0.08); border:1px solid var(--card-border);" onclick="placeQuickBid(${auction.currentBid + 500})">+ ₹500</button>
-            <button class="btn-glow" style="flex:1; background:rgba(255,255,255,0.08); border:1px solid var(--card-border);" onclick="placeQuickBid(${auction.currentBid + 1000})">+ ₹1,000</button>
-            <button class="btn-glow" style="flex:1; background:rgba(255,255,255,0.08); border:1px solid var(--card-border);" onclick="placeQuickBid(${auction.currentBid + 2500})">+ ₹2,500</button>
+            <button class="btn-glow" style="flex:1; background:rgba(255,255,255,0.08); border:1px solid var(--card-border);" onclick="placeQuickBid(${(auction.currentBid || 0) + 500})">+ ₹500</button>
+            <button class="btn-glow" style="flex:1; background:rgba(255,255,255,0.08); border:1px solid var(--card-border);" onclick="placeQuickBid(${(auction.currentBid || 0) + 1000})">+ ₹1,000</button>
+            <button class="btn-glow" style="flex:1; background:rgba(255,255,255,0.08); border:1px solid var(--card-border);" onclick="placeQuickBid(${(auction.currentBid || 0) + 2500})">+ ₹2,500</button>
           </div>
           <button class="btn-glow" style="width:100%; font-size:0.95rem; padding:0.85rem;" onclick="placeQuickBid(${nextMinBid})">
             BID ₹${nextMinBid.toLocaleString('en-IN')} NOW
@@ -1821,16 +1822,35 @@
     }
 
     window.adminStartAuction = async function() {
-      if (!isUserAdmin || !activeAuctionData) return;
+      if (!isUserAdmin || !activeAuctionData) {
+        alert("Admin privileges and an active auction item are required.");
+        return;
+      }
+      
+      const auctionId = activeAuctionData.id;
+      const startingReserve = activeAuctionData.priceNumeric || activeAuctionData.basePrice || activeAuctionData.currentBid || 0;
+      
       try {
-        const auctionRef = doc(db, "auctions", activeAuctionData.id);
-        await updateDoc(auctionRef, {
+        const auctionRef = doc(db, "auctions", auctionId);
+        const newEndTime = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1-hour live run
+        
+        await setDoc(auctionRef, {
+          id: auctionId,
+          title: activeAuctionData.title,
           status: "live",
-          endsAt: new Date(Date.now() + 60 * 60 * 1000).toISOString()
-        });
-        alert("Auction started! Countdown set to 1 hour.");
+          currentBid: startingReserve,
+          minBidIncrement: activeAuctionData.minBidIncrement || 500,
+          highestBidderName: "Reserve Open",
+          highestBidderUid: "",
+          endsAt: newEndTime,
+          image: activeAuctionData.image || "./Assets/omnimade-logo.png",
+          description: activeAuctionData.description || ""
+        }, { merge: true });
+
+        alert(`⚡ Auction for '${activeAuctionData.title}' is now LIVE!`);
       } catch (e) {
-        console.error(e);
+        console.error("Admin Auction Start Error:", e);
+        alert("Permission error or failed to start auction. Check console.");
       }
     };
 
