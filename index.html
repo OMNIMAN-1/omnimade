@@ -784,7 +784,7 @@
     <section class="hero">
       <span class="hero-tag">// HARDWARE &amp; AUTOMATION LAB</span>
       <h1>CRAFTED HARDWARE.<br>CUSTOM CODE DROPS.</h1>
-      <p>Custom builds, hardware automation kits, and open-source scripts.</p>
+      <p>Custom builds, hardware automation kits, and source-available code drops.</p>
     </section>
 
     <main class="section-container">
@@ -909,7 +909,7 @@
     </div>
   </div>
 
-  <!-- VIEW 4: FULL-SCREEN DIGITAL CODE LOCKER OVERLAY (MATCHES PRODUCT PAGE STYLE) -->
+  <!-- VIEW 4: FULL-SCREEN DIGITAL CODE LOCKER OVERLAY -->
   <div id="codeVaultOverlay" class="fullscreen-overlay">
     <button class="back-btn" id="closeCodeVaultOverlay">&larr; BACK TO SHOP</button>
     <h2 style="font-family:var(--font-code); font-size:1.75rem; color:var(--accent-neon); margin-bottom:0.5rem;">🔐 My Digital Code Locker</h2>
@@ -1358,6 +1358,38 @@
         </svg>
       `;
     }
+
+    // --- INLINE SVG BADGE GENERATOR (FOR CARD META ROW & DETAIL HEADER) ---
+    function renderRarityBadgeHTML(item) {
+      const rarity = (item.rarity || 'common').toLowerCase();
+      const rarityLabel = item.rarityLabel || rarity.toUpperCase();
+      const madeCount = item.madeCount || '50';
+      const futurePlan = item.futurePlan || 'Limited Runs';
+      const clickHandler = `onclick="showRarityDetails(event, '${item.title.replace(/'/g, "\\'")}', '${rarity}', '${madeCount}', '${futurePlan}')"`;
+
+      if (rarity === 'vaulted') {
+        const uid = Math.random().toString(36).substring(2, 8);
+        return `
+          <div class="rarity-badge-svg-wrap" ${clickHandler}>
+            ${getVaultedBannerSVG(uid)}
+          </div>
+        `;
+      } else if (rarity === 'legendary') {
+        const uid = Math.random().toString(36).substring(2, 8);
+        return `
+          <div class="rarity-badge-svg-wrap" ${clickHandler}>
+            ${getLegendaryBannerSVG(uid)}
+          </div>
+        `;
+      } else {
+        return `
+          <span class="rarity-badge rarity-${rarity}" ${clickHandler}>
+            ${rarityLabel}
+          </span>
+        `;
+      }
+    }
+    window.renderRarityBadgeHTML = renderRarityBadgeHTML;
 
     // --- INTERACTIVE RARITY POPUP MODAL HANDLER ---
     window.showRarityDetails = function(e, title, rarity, madeCount, futurePlan) {
@@ -2053,11 +2085,9 @@
     // --- CATALOG LOADER ---
     async function initCatalog() {
       try {
-        // Fetch Regular Projects
         const resProj = await fetch('./projects.json?t=' + Date.now());
         const regularProjects = await resProj.json();
 
-        // Fetch Auction Items from auctions.json file
         let auctionProjects = [];
         try {
           const resAuc = await fetch('./auctions.json?t=' + Date.now());
@@ -2068,7 +2098,6 @@
 
         projects = [...regularProjects, ...auctionProjects];
 
-        // Sync with Firestore Inventory
         for (const item of projects) {
           try {
             const docRef = doc(db, "inventory", item.id);
