@@ -911,7 +911,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--card-border); padding-bottom:1rem;">
           <span class="tag" style="background:rgba(239,68,68,0.15); color:#ef4444;" id="auctionLiveBadge">🔴 LIVE VAULT AUCTION</span>
           <div style="font-family:var(--font-code); font-size:0.85rem; color:var(--accent-neon);">
-            ENDS IN: <span id="auctionTimer" style="font-weight:800; color:#fff;">--:--:--</span>
+            ENDS IN: <span id="auctionTimer" style="font-weight:800; color:var(--accent-neon);">--:--:--</span>
           </div>
         </div>
 
@@ -1781,8 +1781,8 @@
       bannerSlot.innerHTML = getVaultedBannerSVG('auction_live_hdr');
       bannerSlot.onclick = (e) => showRarityDetails(e, data.title, data.rarity, "2 Total", "Permanent Vault");
 
-      document.getElementById('auctionTitle').innerText = data.title;
-      document.getElementById('auctionDesc').innerText = data.description || "Limited edition hardware drop.";
+      document.getElementById('auctionTitle').innerText = data.title || "Vault Auction Drop";
+      document.getElementById('auctionDesc').innerText = data.description || "Handcrafted lab unit.";
       document.getElementById('auctionItemImg').src = data.image || "./Assets/omnimade-logo.png";
       document.getElementById('highestBidDisplay').innerText = `₹${(data.currentBid || 0).toLocaleString('en-IN')}`;
       document.getElementById('highestBidderName').innerText = data.highestBidderName 
@@ -1796,16 +1796,20 @@
       const timerEl = document.getElementById('auctionTimer');
       const liveBadge = document.getElementById('auctionLiveBadge');
 
-      timerInterval = setInterval(() => {
-        // Handle upcoming pre-launch timer
+      timerEl.style.color = "var(--accent-neon)";
+      timerEl.style.fontWeight = "800";
+
+      const updateTimerDisplay = () => {
+        // 1. Upcoming Pre-Launch State
         if (data.status === 'upcoming' && data.startsAt) {
           const startDiff = new Date(data.startsAt).getTime() - Date.now();
-          liveBadge.innerText = "⏳ UPCOMING AUCTION";
-          liveBadge.style.background = "rgba(245, 158, 11, 0.15)";
-          liveBadge.style.color = "#f59e0b";
-          
+          if (liveBadge) {
+            liveBadge.innerText = "⏳ UPCOMING AUCTION";
+            liveBadge.style.background = "rgba(245, 158, 11, 0.15)";
+            liveBadge.style.color = "#f59e0b";
+          }
           if (startDiff <= 0) {
-            timerEl.innerText = "READY TO OPEN";
+            timerEl.innerText = "READY TO START";
           } else {
             const h = Math.floor(startDiff / (1000 * 60 * 60));
             const m = Math.floor((startDiff % (1000 * 60 * 60)) / (1000 * 60));
@@ -1815,26 +1819,42 @@
           return;
         }
 
-        liveBadge.innerText = "🔴 LIVE VAULT AUCTION";
-        liveBadge.style.background = "rgba(239, 68, 68, 0.15)";
-        liveBadge.style.color = "#ef4444";
+        // 2. Concluded / Ended State
+        if (data.status === 'ended') {
+          if (liveBadge) {
+            liveBadge.innerText = "🔒 AUCTION ENDED";
+            liveBadge.style.background = "rgba(100, 116, 139, 0.2)";
+            liveBadge.style.color = "#94a3b8";
+          }
+          timerEl.innerText = "CONCLUDED";
+          return;
+        }
 
-        if (!data.endsAt || data.status === 'ended') {
-          timerEl.innerText = data.status === 'ended' ? "CONCLUDED" : "READY";
+        // 3. Live Running State
+        if (liveBadge) {
+          liveBadge.innerText = "🔴 LIVE VAULT AUCTION";
+          liveBadge.style.background = "rgba(239, 68, 68, 0.15)";
+          liveBadge.style.color = "#ef4444";
+        }
+
+        if (!data.endsAt) {
+          timerEl.innerText = "01:00:00";
           return;
         }
 
         const diff = new Date(data.endsAt).getTime() - Date.now();
         if (diff <= 0) {
           timerEl.innerText = "00:00:00";
-          clearInterval(timerInterval);
         } else {
           const hours = Math.floor(diff / (1000 * 60 * 60));
           const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
           const secs = Math.floor((diff % (1000 * 60)) / 1000);
           timerEl.innerText = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
         }
-      }, 1000);
+      };
+
+      updateTimerDisplay();
+      timerInterval = setInterval(updateTimerDisplay, 1000);
 
       renderBidActionBox(data);
     }
@@ -2002,14 +2022,25 @@
     };
 
     window.adminAddAuctionTime = async function(secondsToAdd) {
-      if (!isUserAdmin || !activeAuctionData) return;
+      if (!isUserAdmin || !activeAuctionData) {
+        alert("Admin privileges required.");
+        return;
+      }
       try {
         const auctionRef = doc(db, "auctions", activeAuctionData.id);
-        const currentEnd = new Date(activeAuctionData.endsAt || Date.now()).getTime();
-        const newEnd = new Date(Math.max(Date.now(), currentEnd) + secondsToAdd * 1000).toISOString();
-        await setDoc(auctionRef, { endsAt: newEnd, status: "live" }, { merge: true });
+        const currentEnd = activeAuctionData.endsAt ? new Date(activeAuctionData.endsAt).getTime() : Date.now();
+        const baseTime = Math.max(Date.now(), currentEnd);
+        const newEnd = new Date(baseTime + secondsToAdd * 1000).toISOString();
+        
+        await setDoc(auctionRef, { 
+          endsAt: newEnd, 
+          status: "live" 
+        }, { merge: true });
+
+        alert(`⏱️ Added +${secondsToAdd / 60} minutes! Auction is resumed LIVE.`);
       } catch (e) {
-        console.error(e);
+        console.error("Admin Add Time Error:", e);
+        alert("Failed to update auction time.");
       }
     };
 
