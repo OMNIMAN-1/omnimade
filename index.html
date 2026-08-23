@@ -784,7 +784,7 @@
     <section class="hero">
       <span class="hero-tag">// HARDWARE &amp; AUTOMATION LAB</span>
       <h1>CRAFTED HARDWARE.<br>CUSTOM CODE DROPS.</h1>
-      <p>Custom builds, hardware automation kits, and source-available code drops.</p>
+      <p>Custom builds, hardware automation kits, and open-source scripts.</p>
     </section>
 
     <main class="section-container">
@@ -2057,7 +2057,7 @@
         const resProj = await fetch('./projects.json?t=' + Date.now());
         const regularProjects = await resProj.json();
 
-        // Fetch Auction Items from new auctions.json file
+        // Fetch Auction Items from auctions.json file
         let auctionProjects = [];
         try {
           const resAuc = await fetch('./auctions.json?t=' + Date.now());
