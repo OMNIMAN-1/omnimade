@@ -904,6 +904,7 @@
             <button class="btn-glow" style="padding:0.35rem 0.65rem; font-size:0.7rem; background:#22c55e; color:#000; font-weight:800;" onclick="adminStartAuction()">START AUCTION</button>
             <button class="btn-glow" style="padding:0.35rem 0.65rem; font-size:0.7rem; background:#eab308; color:#000; font-weight:800;" onclick="adminAddAuctionTime(120)">+2 MINS</button>
             <button class="btn-glow" style="padding:0.35rem 0.65rem; font-size:0.7rem; background:#ef4444; color:#fff; font-weight:800;" onclick="adminEndAuction()">END &amp; CALL WINNER</button>
+            <button class="btn-glow" style="padding:0.35rem 0.65rem; font-size:0.7rem; background:#8b5cf6; color:#fff; font-weight:800;" onclick="adminCallRunnerUp()">CALL RUNNER-UP (DEFAULT)</button>
             <button class="btn-glow" style="padding:0.35rem 0.65rem; font-size:0.7rem; background:#3b82f6; color:#fff; font-weight:800;" onclick="triggerAuctionNotificationBroadcast()">📢 NOTIFY ALL</button>
           </div>
         </div>
@@ -1822,7 +1823,7 @@
         // 2. Concluded / Ended State
         if (data.status === 'ended') {
           if (liveBadge) {
-            liveBadge.innerText = "🔒 AUCTION ENDED";
+            liveBadge.innerText = "🔒 AUCTION CONCLUDED";
             liveBadge.style.background = "rgba(100, 116, 139, 0.2)";
             liveBadge.style.color = "#94a3b8";
           }
@@ -1999,8 +2000,8 @@
 
       try {
         const auctionRef = doc(db, "auctions", auctionId);
-        const newEndTime = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1-hour live run
-        
+        const newEndTime = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+
         await setDoc(auctionRef, {
           id: auctionId,
           title: title,
@@ -2022,31 +2023,28 @@
     };
 
     window.adminAddAuctionTime = async function(secondsToAdd) {
-      if (!isUserAdmin || !activeAuctionData) {
-        alert("Admin privileges required.");
+      if (!isUserAdmin || !activeAuctionData) return;
+      
+      // Strict rule: Time cannot be added to a finalized/ended auction
+      if (activeAuctionData.status === 'ended') {
+        alert("❌ Decision Locked: This auction has concluded and the winner has been called. Time cannot be added.");
         return;
       }
+
       try {
         const auctionRef = doc(db, "auctions", activeAuctionData.id);
         const currentEnd = activeAuctionData.endsAt ? new Date(activeAuctionData.endsAt).getTime() : Date.now();
-        const baseTime = Math.max(Date.now(), currentEnd);
-        const newEnd = new Date(baseTime + secondsToAdd * 1000).toISOString();
-        
-        await setDoc(auctionRef, { 
-          endsAt: newEnd, 
-          status: "live" 
-        }, { merge: true });
-
-        alert(`⏱️ Added +${secondsToAdd / 60} minutes! Auction is resumed LIVE.`);
+        const newEnd = new Date(Math.max(Date.now(), currentEnd) + secondsToAdd * 1000).toISOString();
+        await setDoc(auctionRef, { endsAt: newEnd }, { merge: true });
+        alert(`⏱️ Added +${secondsToAdd / 60} minutes to live clock.`);
       } catch (e) {
-        console.error("Admin Add Time Error:", e);
-        alert("Failed to update auction time.");
+        console.error("Add Time Error:", e);
       }
     };
 
     window.adminEndAuction = async function() {
       if (!isUserAdmin || !activeAuctionData) return;
-      if (confirm(`Conclude auction now and award to ${activeAuctionData.highestBidderName || 'highest bidder'}?`)) {
+      if (confirm(`Conclude auction now and award to ${activeAuctionData.highestBidderName || 'highest bidder'}? This decision is final.`)) {
         try {
           const auctionRef = doc(db, "auctions", activeAuctionData.id);
           await setDoc(auctionRef, {
@@ -2054,8 +2052,47 @@
             endsAt: new Date().toISOString()
           }, { merge: true });
         } catch (e) {
-          console.error(e);
+          console.error("End Auction Error:", e);
         }
+      }
+    };
+
+    // Default Fallback: Transfer win to runner-up if highest bidder defaults
+    window.adminCallRunnerUp = async function() {
+      if (!isUserAdmin || !activeAuctionData) return;
+      if (activeAuctionData.status !== 'ended') {
+        alert("Runner-up can only be called if the auction is concluded and the primary winner has defaulted.");
+        return;
+      }
+
+      try {
+        const bidsSnap = await getDocs(query(collection(db, "auctions", activeAuctionData.id, "bids")));
+        const bids = [];
+        bidsSnap.forEach(d => bids.push({ id: d.id, ...d.data() }));
+        bids.sort((a, b) => b.amount - a.amount);
+
+        // Filter out defaulted highest bidder
+        const remainingBids = bids.filter(b => b.bidderUid !== activeAuctionData.highestBidderUid);
+
+        if (!remainingBids.length) {
+          alert("No remaining secondary bids found in the ledger. Item returned to maker reserve.");
+          return;
+        }
+
+        const runnerUp = remainingBids[0];
+        if (confirm(`Award drop to runner-up: ${runnerUp.bidderName} at ₹${runnerUp.amount.toLocaleString('en-IN')}?`)) {
+          const auctionRef = doc(db, "auctions", activeAuctionData.id);
+          await setDoc(auctionRef, {
+            currentBid: runnerUp.amount,
+            highestBidderName: runnerUp.bidderName,
+            highestBidderUid: runnerUp.bidderUid,
+            winnerPaid: false
+          }, { merge: true });
+          alert(`🏆 Drop officially awarded to runner-up: ${runnerUp.bidderName}`);
+        }
+      } catch (e) {
+        console.error("Runner-up Call Error:", e);
+        alert("Failed to process runner-up.");
       }
     };
 
