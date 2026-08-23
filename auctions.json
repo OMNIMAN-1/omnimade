@@ -1,0 +1,22 @@
+[
+  {
+    "id": "omni-core-01",
+    "title": "Omni Core Handheld [1 of 1 Public Unit]",
+    "rarity": "vaulted",
+    "rarityLabel": "VAULTED DROP",
+    "badge": "HARDWARE DROP",
+    "category": "auction",
+    "isAuction": true,
+    "basePrice": 24999,
+    "price": "₹24,999",
+    "priceNumeric": 24999,
+    "minBidIncrement": 500,
+    "currentBid": 24999,
+    "status": "live",
+    "stock": 1,
+    "image": "./Assets/omnimade-logo.png",
+    "endsAt": "2026-08-30T12:00:00.000Z",
+    "description": "Ultra-complex handcrafted build. Unit 02/02. Housed in a custom carved wooden presentation case with wax-sealed metal authentication dossier.",
+    "fullDescription": "Ultra-complex handcrafted build. Unit 02/02. Housed in a custom carved wooden presentation case with wax-sealed metal authentication dossier. Never to be produced again."
+  }
+]
