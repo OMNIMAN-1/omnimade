@@ -384,7 +384,7 @@
       box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
     }
 
-    /* FULL-SCREEN OVERLAYS (CODE LOCKER & PROVENANCE VERIFY) */
+    /* FULL-SCREEN OVERLAYS */
     .fullscreen-overlay {
       display: none;
       min-height: calc(100vh - 80px);
@@ -587,7 +587,7 @@
     }
     .auth-error-msg { color: var(--danger); font-size: 0.85rem; font-family: var(--font-code); display: none; margin-bottom: 0.75rem; }
 
-    /* Slide-out Cart Drawer with Steppers */
+    /* Slide-out Cart Drawer */
     .cart-drawer {
       position: fixed;
       right: -420px;
@@ -1112,6 +1112,7 @@
     let currentReviewsList = [];
     let activeCoupon = null;
     let liveStockMap = {};
+    let liveAuctionMap = {}; // Real-time synchronized state for all auctions
 
     // Live Auction State
     let currentAuctionUnsub = null;
@@ -2005,7 +2006,7 @@
         return;
       }
 
-      // Check: Do not restart concluded or running auctions
+      // Safeguard: Do not restart concluded or running auctions
       if (activeAuctionData.status === 'ended') {
         alert("❌ Decision Locked: This auction has concluded and the winner has been called. Concluded auctions cannot be restarted.");
         return;
@@ -2356,7 +2357,7 @@
       }
     });
 
-    // --- CATALOG LOADER ---
+    // --- CATALOG LOADER & SYNCHRONIZED FIRESTORE LISTENER ---
     async function initCatalog() {
       try {
         const resProj = await fetch('./projects.json?t=' + Date.now());
@@ -2371,6 +2372,14 @@
         }
 
         projects = [...regularProjects, ...auctionProjects];
+
+        // Real-time listener for Firestore auctions collection: Updates homepage cards instantly!
+        onSnapshot(collection(db, "auctions"), (snapshot) => {
+          snapshot.forEach((docSnap) => {
+            liveAuctionMap[docSnap.id] = docSnap.data();
+          });
+          renderGrid(projects);
+        });
 
         for (const item of projects) {
           try {
@@ -2405,15 +2414,57 @@
         const isLowStock = stockLeft > 0 && stockLeft < 10;
         const isAuction = item.isAuction || item.rarity === 'vaulted' || item.category === 'auction';
 
+        // Fetch live Firestore state if this is an auction
+        const aucData = liveAuctionMap[item.id];
+        const aucStatus = aucData ? aucData.status : (item.status || 'upcoming');
+        const displayBid = aucData ? (aucData.currentBid || aucData.basePrice || item.priceNumeric) : item.priceNumeric;
+        const winnerName = aucData ? (aucData.highestBidderName || '') : '';
+
+        let priceDisplay = '';
         let stockNotice = '';
+        let actionButtons = '';
+
         if (isAuction) {
-          stockNotice = `<div class="stock-warning" style="color:#d4af37;">⚡ LIVE BIDDING ARENA ACTIVE</div>`;
-        } else if (isOutOfStock) {
-          stockNotice = `<div class="stock-warning">🔴 OUT OF STOCK</div>`;
-        } else if (isFullyInCart) {
-          stockNotice = `<div class="stock-warning" style="color:var(--accent-gold);">⚠️ ALL STOCK (${stockLeft}) IN CART</div>`;
-        } else if (isLowStock) {
-          stockNotice = `<div class="stock-warning">⚠️ ONLY ${stockLeft} UNITS LEFT!</div>`;
+          if (aucStatus === 'ended') {
+            priceDisplay = `<div style="font-family: var(--font-code); font-weight:700; font-size:1.1rem; color: #94a3b8;">Winning Bid: ₹${Number(displayBid || 0).toLocaleString('en-IN')}</div>`;
+            stockNotice = `<div class="stock-warning" style="color:#94a3b8; font-size:0.75rem;">🔒 CONCLUDED ${winnerName && winnerName !== 'Reserve Open' ? `• WON BY ${winnerName.toUpperCase()}` : ''}</div>`;
+            actionButtons = `
+              <button class="btn-buy" style="background:#1f2937; color:#9ca3af; border:1px solid var(--card-border); width:100%; cursor:pointer;" onclick="openAuctionRoom('${item.id}')">
+                🏛️ VIEW AUCTION RESULT
+              </button>
+            `;
+          } else if (aucStatus === 'live') {
+            priceDisplay = `<div style="font-family: var(--font-code); font-weight:700; font-size:1.1rem; color: var(--accent-neon);">Current Bid: ₹${Number(displayBid || 0).toLocaleString('en-IN')}</div>`;
+            stockNotice = `<div class="stock-warning" style="color:#22c55e;">🔴 LIVE BIDDING ACTIVE ${winnerName && winnerName !== 'Reserve Open' ? `• ${winnerName}` : ''}</div>`;
+            actionButtons = `
+              <button class="btn-buy" style="background:#ff2a4b; width:100%; box-shadow:0 0 15px rgba(255,42,75,0.4);" onclick="openAuctionRoom('${item.id}')">
+                ⚡ ENTER AUCTION ROOM
+              </button>
+            `;
+          } else {
+            priceDisplay = `<div style="font-family: var(--font-code); font-weight:700; font-size:1.1rem; color: #f59e0b;">Starting Reserve: ₹${Number(displayBid || 0).toLocaleString('en-IN')}</div>`;
+            stockNotice = `<div class="stock-warning" style="color:#f59e0b;">⏳ UPCOMING AUCTION</div>`;
+            actionButtons = `
+              <button class="btn-buy" style="background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid #f59e0b; width:100%;" onclick="openAuctionRoom('${item.id}')">
+                🔒 VIEW PRE-LAUNCH ARENA
+              </button>
+            `;
+          }
+        } else {
+          priceDisplay = `<div style="font-family: var(--font-code); font-weight:700; font-size:1.1rem; color: var(--accent-neon);">${item.price}</div>`;
+
+          if (isOutOfStock) {
+            stockNotice = `<div class="stock-warning">🔴 OUT OF STOCK</div>`;
+          } else if (isFullyInCart) {
+            stockNotice = `<div class="stock-warning" style="color:var(--accent-gold);">⚠️ ALL STOCK (${stockLeft}) IN CART</div>`;
+          } else if (isLowStock) {
+            stockNotice = `<div class="stock-warning">⚠️ ONLY ${stockLeft} UNITS LEFT!</div>`;
+          }
+
+          actionButtons = `
+            <button class="btn-cart ${isOutOfStock || isFullyInCart ? 'btn-disabled' : ''}" onclick="addToCart('${item.id}')">${isOutOfStock ? 'OUT OF STOCK' : isFullyInCart ? 'MAXED IN CART' : 'ADD TO CART'}</button>
+            <button class="btn-buy ${isOutOfStock || isFullyInCart ? 'btn-disabled' : ''}" onclick="buyNow('${item.id}')">${isOutOfStock ? 'SOLD OUT' : isFullyInCart ? 'MAXED IN CART' : 'BUY NOW'}</button>
+          `;
         }
 
         return `
@@ -2428,19 +2479,15 @@
             </div>
             <h3 class="card-title" onclick="${isAuction ? `openAuctionRoom('${item.id}')` : `openProductPage('${item.id}')`}">${item.title}</h3>
             <p class="card-desc">${item.description}</p>
-            <div style="font-family: var(--font-code); font-weight:700; font-size:1.1rem; color: var(--accent-neon);">${isAuction ? `Starting Reserve: ${item.price}` : item.price}</div>
+            ${priceDisplay}
             ${stockNotice}
             <div class="card-actions-group">
-              ${isAuction ? `
-                <button class="btn-buy" style="background:#ff2a4b; width:100%;" onclick="openAuctionRoom('${item.id}')">⚡ ENTER AUCTION ROOM</button>
-              ` : `
-                <button class="btn-cart ${isOutOfStock || isFullyInCart ? 'btn-disabled' : ''}" onclick="addToCart('${item.id}')">${isOutOfStock ? 'OUT OF STOCK' : isFullyInCart ? 'MAXED IN CART' : 'ADD TO CART'}</button>
-                <button class="btn-buy ${isOutOfStock || isFullyInCart ? 'btn-disabled' : ''}" onclick="buyNow('${item.id}')">${isOutOfStock ? 'SOLD OUT' : isFullyInCart ? 'MAXED IN CART' : 'BUY NOW'}</button>
-              `}
+              ${actionButtons}
             </div>
           </div>
         </div>
-      `}).join('');
+      `;
+      }).join('');
     }
 
     function renderProductPageQtyArea(productId) {
